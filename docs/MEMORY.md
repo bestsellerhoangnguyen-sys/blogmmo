@@ -26,3 +26,4 @@
 - D1-06 hoàn tất: `/blog` render dữ liệu Post từ Prisma + phân trang (`?page=`).
 - D1-07 hoàn tất: `/blog/[slug]` + metadata SEO/OG theo từng bài.
 - D1-08 hoàn tất: RSS `/feed.xml` và `sitemap.xml` tự động từ dữ liệu DB.
+- D1-09 hoàn tất: có unit test cho `getPostBySlug` bằng Vitest (mock Prisma), test pass.
