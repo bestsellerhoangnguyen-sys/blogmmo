@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS = 120;
+const AUTH_WINDOW_MS = 60 * 1000;
+const AUTH_MAX_REQUESTS = 20;
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
 function rateLimitKey(req: NextRequest) {
@@ -11,15 +13,18 @@ function rateLimitKey(req: NextRequest) {
 
 export function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/api")) {
+    const isAuthEndpoint = req.nextUrl.pathname.startsWith("/api/auth");
+    const windowMs = isAuthEndpoint ? AUTH_WINDOW_MS : WINDOW_MS;
+    const maxReq = isAuthEndpoint ? AUTH_MAX_REQUESTS : MAX_REQUESTS;
     const key = rateLimitKey(req);
     const now = Date.now();
     const bucket = buckets.get(key);
 
     if (!bucket || now > bucket.resetAt) {
-      buckets.set(key, { count: 1, resetAt: now + WINDOW_MS });
+      buckets.set(key, { count: 1, resetAt: now + windowMs });
     } else {
       bucket.count += 1;
-      if (bucket.count > MAX_REQUESTS) {
+      if (bucket.count > maxReq) {
         return NextResponse.json({ error: "Too many requests" }, { status: 429 });
       }
     }
@@ -31,7 +36,7 @@ export function middleware(req: NextRequest) {
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:;"
+    "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; object-src 'none';"
   );
   return res;
 }

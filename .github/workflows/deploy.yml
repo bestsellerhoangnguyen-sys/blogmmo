@@ -38,7 +38,8 @@ jobs:
             cd /var/www/blogmmo/current
             git pull origin main
             npm ci
+            npx prisma migrate resolve --applied 20260417_phase2_baseline || true
+            npx prisma migrate deploy
             npm run build
-            npx prisma db push
             pm2 reload /var/www/blogmmo/current/ecosystem.config.js --only blogmmo || pm2 start /var/www/blogmmo/current/ecosystem.config.js --only blogmmo
             pm2 save

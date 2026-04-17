@@ -43,6 +43,11 @@ Move from MVP-complete system to production-grade reliability and maintainabilit
 - Add category/tag management UI
 
 ## Immediate next sprint (first 3 tasks)
-1. **Migration pipeline conversion** (`db push` → `migrate deploy`)  
-2. **Upload storage migration** (local → S3-compatible)  
-3. **Auth+security tightening** (admin password rotation, auth endpoint throttling)
+1. ✅ **Migration pipeline conversion** (`db push` → `migrate deploy`)  
+2. ✅ **Upload storage migration** (local → S3-compatible, env-gated activation)  
+3. ✅ **Auth+security tightening** (admin password rotation, auth endpoint throttling)
+
+## Post-Phase2 follow-up
+- Provide real S3 credentials and enable remote media storage in production.
+- Expand automated integration/e2e tests for admin CRUD and auth failure paths.
+- Remove `unsafe-inline` CSP through nonce/hash strategy in Next.js templates.

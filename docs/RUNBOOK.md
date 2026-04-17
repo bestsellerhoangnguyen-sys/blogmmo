@@ -4,17 +4,18 @@
 1. Pull code vào `/var/www/blogmmo/current` (hoặc rsync từ CI runner)
 2. Khôi phục/tạo `.env` production (lưu ý không để rsync --delete xóa file env)
 3. Cài deps: `npm ci`
-4. DB sync hiện tại (MVP): `npx prisma db push`
-5. Build: `npm run build`
-6. Reload app: `pm2 reload ecosystem.config.js --only blogmmo`
-7. Persist process list: `pm2 save`
+4. Apply baseline if needed (once): `npx prisma migrate resolve --applied 20260417_phase2_baseline || true`
+5. DB migrate: `npx prisma migrate deploy`
+6. Build: `npm run build`
+7. Reload app: `pm2 reload ecosystem.config.js --only blogmmo`
+8. Persist process list: `pm2 save`
 
 ## 2) Rollback nhanh
 1. Vào thư mục deploy: `cd /var/www/blogmmo/current`
 2. Checkout commit stable gần nhất: `git checkout <commit>`
 3. Cài deps: `npm ci`
 4. Build: `npm run build`
-5. Sync DB nếu cần tương thích schema: `npx prisma db push`
+5. Sync schema by migrations: `npx prisma migrate deploy`
 6. Reload app: `pm2 reload ecosystem.config.js --only blogmmo`
 
 ## 3) Backup DB

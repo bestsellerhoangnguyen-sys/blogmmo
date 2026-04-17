@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/session";
 import { verifyCsrfToken } from "@/lib/csrf";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
+import { uploadImage } from "@/lib/storage";
 
 export async function POST(req: Request) {
   const session = await requireAuth();
@@ -18,12 +17,6 @@ export async function POST(req: Request) {
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const ext = path.extname(file.name) || ".bin";
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(path.join(uploadDir, filename), buffer);
-
-  return NextResponse.json({ url: `/uploads/${filename}` }, { status: 201 });
+  const uploaded = await uploadImage(file.name, buffer);
+  return NextResponse.json(uploaded, { status: 201 });
 }
