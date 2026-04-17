@@ -61,7 +61,12 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
                 </span>
               ))}
             </div>
-            <p className="mt-4 text-sm text-gray-500">Slug: /blog/{post.slug}</p>
+            <Link
+              href={`/blog/${post.slug}`}
+              className="mt-4 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
+            >
+              Đọc chi tiết →
+            </Link>
           </article>
         ))}
       </div>

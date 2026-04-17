@@ -24,3 +24,5 @@
 - D1-04 hoàn tất: tích hợp next-auth (Credentials + Google), có trang `/login` và luồng login/logout cơ bản.
 - D1-05 hoàn tất: layout tổng có Header/Footer, dark mode toggle hoạt động.
 - D1-06 hoàn tất: `/blog` render dữ liệu Post từ Prisma + phân trang (`?page=`).
+- D1-07 hoàn tất: `/blog/[slug]` + metadata SEO/OG theo từng bài.
+- D1-08 hoàn tất: RSS `/feed.xml` và `sitemap.xml` tự động từ dữ liệu DB.
