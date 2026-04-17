@@ -42,3 +42,42 @@ model Tag {
   updatedAt DateTime @updatedAt
   posts     Post[]
 }
+
+model GuideCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  guides    Guide[]
+}
+
+model Guide {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  summary     String?
+  published   Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  categoryId  String
+  category    GuideCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  steps       GuideStep[]
+
+  @@index([published])
+  @@index([categoryId])
+}
+
+model GuideStep {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  order     Int
+  guideId   String
+  guide     Guide    @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([guideId, order])
+  @@index([guideId])
+}

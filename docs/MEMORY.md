@@ -29,3 +29,4 @@
 - D1-09 hoàn tất: có unit test cho `getPostBySlug` bằng Vitest (mock Prisma), test pass.
 - Đã review đồng bộ tổng quan Day 1; chuẩn hóa checklist trạng thái thực tế và tạo `docs/DECISIONS.md` để tra cứu quyết định + lý do.
 - Điểm lệch cần nhớ: D1-07 chưa parse MDX đầy đủ, sẽ xử lý ở phase sau.
+- Đã bắt đầu Day 2 (D2-01): thêm schema `GuideCategory/Guide/GuideStep` và sync DB thành công.
