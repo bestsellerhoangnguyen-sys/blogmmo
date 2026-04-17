@@ -35,3 +35,5 @@
 - Day 3 đã triển khai production app lên VPS: PM2 app `blogmmo` online, Nginx reverse proxy HTTPS hoạt động, `/api/health` trả OK.
 - Backup DB đã bật cron 02:00 với script riêng và retention 14 ngày.
 - Lưu ý vận hành: dùng rsync --delete có thể xóa `.env` production nếu không exclude; đã cập nhật runbook để tránh lặp lỗi.
+- Day 3 hoàn tất thêm: LHCI workflow + thresholds, analytics env-driven injection, runbook rollback/restore/healthcheck được hoàn thiện.
+- Production app đã reload ổn định sau cập nhật Day 3; cron backup vẫn tồn tại và hoạt động.

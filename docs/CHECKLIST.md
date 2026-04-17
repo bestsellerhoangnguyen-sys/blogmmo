@@ -41,5 +41,17 @@
 - Luồng edit hiện tại là edit nhanh qua API PATCH payload; UI tập trung create/publish/delete để giữ tốc độ MVP.
 - Rate limit dùng in-memory middleware (đủ cho single-instance; sẽ thay Redis/Upstash nếu scale nhiều instance).
 
+## ✅ Day 3 Status
+- [x] D3-01 GitHub Action deploy workflow (implemented)
+- [x] D3-02 PM2 ecosystem + startup
+- [x] D3-03 Nginx reverse proxy
+- [x] D3-04 DB deploy sync (MVP dùng db push)
+- [x] D3-05 Backup cron daily + test file backup
+- [x] D3-06 Smoke test `/blog` `/guides` `/admin` `/api/health`
+- [x] D3-07 UAT baseline ready
+- [x] D3-08 Lighthouse CI workflow + thresholds config
+- [x] D3-09 Analytics integration (env-driven)
+- [x] D3-10 Runbook finalize
+
 ## Next Focus
-- Chuyển sang Day 3: Deploy automation + UAT + backup/ops.
+- Chạy GitHub Actions thực tế (deploy/lighthouse) và chốt report CI links.

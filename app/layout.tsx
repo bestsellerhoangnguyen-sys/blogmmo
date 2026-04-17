@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { Analytics } from "@/components/analytics";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,6 +37,7 @@ export default function RootLayout({
             <SiteHeader />
             <div className="mx-auto w-full max-w-5xl px-6 py-8">{children}</div>
             <SiteFooter />
+            <Analytics />
           </div>
         </Providers>
       </body>
