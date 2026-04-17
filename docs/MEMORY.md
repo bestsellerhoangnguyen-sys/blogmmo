@@ -22,3 +22,5 @@
 - D1-02/D1-03 bootstrap hoàn tất: Prisma schema `User/Post/Tag` + seed 3 bài mẫu.
 - Với quyền DB hiện tại, `prisma migrate dev` không chạy được do shadow DB permission; tạm dùng `prisma db push` cho giai đoạn bootstrap.
 - D1-04 hoàn tất: tích hợp next-auth (Credentials + Google), có trang `/login` và luồng login/logout cơ bản.
+- D1-05 hoàn tất: layout tổng có Header/Footer, dark mode toggle hoạt động.
+- D1-06 hoàn tất: `/blog` render dữ liệu Post từ Prisma + phân trang (`?page=`).
