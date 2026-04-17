@@ -1,0 +1,44 @@
+name: Deploy BlogMMO
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            mkdir -p /var/www/blogmmo/current
+            cd /var/www/blogmmo/current
+            git pull origin main
+            npm ci
+            npm run build
+            npx prisma db push
+            pm2 reload /var/www/blogmmo/current/ecosystem.config.js --only blogmmo || pm2 start /var/www/blogmmo/current/ecosystem.config.js --only blogmmo
+            pm2 save

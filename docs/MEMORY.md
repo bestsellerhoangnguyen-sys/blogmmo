@@ -32,3 +32,6 @@
 - Đã bắt đầu Day 2 (D2-01): thêm schema `GuideCategory/Guide/GuideStep` và sync DB thành công.
 - Day 2 đã hoàn tất D2-02..D2-10: guides search/filter + detail progress bar, API CRUD có auth guard, admin panel, upload image local, rate limit middleware, security headers + CSRF, env staging template.
 - Đã kiểm tra sau từng cụm tính năng bằng build/test/curl để xác nhận không lỗi trước khi qua bước tiếp.
+- Day 3 đã triển khai production app lên VPS: PM2 app `blogmmo` online, Nginx reverse proxy HTTPS hoạt động, `/api/health` trả OK.
+- Backup DB đã bật cron 02:00 với script riêng và retention 14 ngày.
+- Lưu ý vận hành: dùng rsync --delete có thể xóa `.env` production nếu không exclude; đã cập nhật runbook để tránh lặp lỗi.

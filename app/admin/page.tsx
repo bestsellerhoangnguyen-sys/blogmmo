@@ -36,7 +36,10 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    if (status === "authenticated") loadData();
+    if (status === "authenticated") {
+      fetch("/api/csrf");
+      loadData();
+    }
   }, [status]);
 
   async function uploadImage(file: File) {
