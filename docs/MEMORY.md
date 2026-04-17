@@ -18,3 +18,6 @@
 - Domain `sspaitools.com` + `www.sspaitools.com` đã trỏ đúng IP VPS và đã cấp SSL thành công (Let's Encrypt).
 - Do repo AlmaLinux 10 chưa có gói certbot mặc định, triển khai certbot qua `pip3`.
 - Firewalld đã bật, zone public chỉ giữ `ssh/http/https`.
+- D1-01 hoàn tất: project đã init Next.js 14 App Router và push lên GitHub bằng deploy key.
+- D1-02/D1-03 bootstrap hoàn tất: Prisma schema `User/Post/Tag` + seed 3 bài mẫu.
+- Với quyền DB hiện tại, `prisma migrate dev` không chạy được do shadow DB permission; tạm dùng `prisma db push` cho giai đoạn bootstrap.
