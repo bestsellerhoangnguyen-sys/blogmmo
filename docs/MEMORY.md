@@ -39,3 +39,5 @@
 - Production app đã reload ổn định sau cập nhật Day 3; cron backup vẫn tồn tại và hoạt động.
 - Đã tạo bộ tài liệu đóng dự án: `FINAL_REPORT.md`, `HANDOVER_CHECKLIST.md`, `NEXT_PHASE_PLAN.md` để bàn giao và lên kế hoạch bước tiếp theo.
 - Phase 2 đã triển khai thực tế: migration pipeline chuyển sang `migrate deploy` + baseline resolve; upload đã có lớp S3-compatible (fallback local); auth/security được siết thêm (auth throttle/CSP) và admin password production đã rotate.
+- Đã bổ sung tự động hóa e2e smoke bằng Playwright + GitHub workflow; fix cấu hình Vitest để chỉ chạy test nội bộ và tránh quét node_modules.
+- Re-deploy production sau cập nhật Phase 2 continuation thành công, health checks vẫn xanh.
