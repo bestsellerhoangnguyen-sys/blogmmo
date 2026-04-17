@@ -30,3 +30,5 @@
 - Đã review đồng bộ tổng quan Day 1; chuẩn hóa checklist trạng thái thực tế và tạo `docs/DECISIONS.md` để tra cứu quyết định + lý do.
 - Điểm lệch cần nhớ: D1-07 chưa parse MDX đầy đủ, sẽ xử lý ở phase sau.
 - Đã bắt đầu Day 2 (D2-01): thêm schema `GuideCategory/Guide/GuideStep` và sync DB thành công.
+- Day 2 đã hoàn tất D2-02..D2-10: guides search/filter + detail progress bar, API CRUD có auth guard, admin panel, upload image local, rate limit middleware, security headers + CSRF, env staging template.
+- Đã kiểm tra sau từng cụm tính năng bằng build/test/curl để xác nhận không lỗi trước khi qua bước tiếp.

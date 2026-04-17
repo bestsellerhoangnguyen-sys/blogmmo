@@ -47,3 +47,24 @@
 - **Tạm dùng `prisma db push` ở bootstrap thay cho `prisma migrate dev`**
   - **Lý do:** quyền DB hiện tại không tạo được shadow DB; tránh block tiến độ Day 1.
   - **Hệ quả:** cần quay lại migration versioned chuẩn trước/ở D3 (`prisma migrate deploy`).
+
+## Quyết định bổ sung Day 2
+
+- **Guides được model hóa thành `GuideCategory -> Guide -> GuideStep`**
+  - **Lý do:** dễ mở rộng taxonomy + thứ tự step rõ ràng cho UX học theo từng bước.
+
+- **CRUD đi qua API routes + auth guard thay vì server actions-only**
+  - **Lý do:** tách rõ contract FE/BE, thuận lợi mở rộng mobile/API client sau này.
+
+- **CSRF theo double-submit token (cookie + header)**
+  - **Lý do:** nhẹ, dễ triển khai cho MVP và phù hợp form/API mutation hiện tại.
+
+- **Upload ảnh local vào `/public/uploads` ở giai đoạn này**
+  - **Lý do:** ship nhanh; sẽ chuyển S3/object storage khi cần scale hoặc multi-instance.
+
+- **Rate limit in-memory ở middleware**
+  - **Lý do:** nhanh, không cần thêm hạ tầng; chấp nhận giới hạn single-instance.
+  - **Hệ quả:** nếu scale ngang nhiều instance cần chuyển Redis/Upstash.
+
+- **Editor chọn markdown/MDX textarea + preview (`marked`) thay vì editor nặng**
+  - **Lý do:** giảm độ phức tạp, đảm bảo tiến độ Day 2 nhưng vẫn có trải nghiệm soạn + preview.

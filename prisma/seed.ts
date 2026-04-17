@@ -72,8 +72,47 @@ async function main() {
     })
   }
 
-  const count = await prisma.post.count()
-  console.log(`Seed complete. Total posts: ${count}`)
+  const basicsCategory = await prisma.guideCategory.upsert({
+    where: { slug: 'blog-basics' },
+    update: { name: 'Blog Basics' },
+    create: { slug: 'blog-basics', name: 'Blog Basics' },
+  })
+
+  await prisma.guide.upsert({
+    where: { slug: 'xay-dung-blog-tung-buoc' },
+    update: {
+      title: 'Xây dựng blog từng bước',
+      summary: 'Guide mẫu để kiểm tra flow Day 2',
+      published: true,
+      categoryId: basicsCategory.id,
+      steps: {
+        deleteMany: {},
+        create: [
+          { order: 1, title: 'Chuẩn bị môi trường', content: 'Cài Node, DB và clone source.' },
+          { order: 2, title: 'Cấu hình auth', content: 'Thiết lập next-auth + env.' },
+          { order: 3, title: 'Deploy', content: 'Build và chạy qua PM2 + Nginx.' },
+        ],
+      },
+    },
+    create: {
+      title: 'Xây dựng blog từng bước',
+      slug: 'xay-dung-blog-tung-buoc',
+      summary: 'Guide mẫu để kiểm tra flow Day 2',
+      published: true,
+      categoryId: basicsCategory.id,
+      steps: {
+        create: [
+          { order: 1, title: 'Chuẩn bị môi trường', content: 'Cài Node, DB và clone source.' },
+          { order: 2, title: 'Cấu hình auth', content: 'Thiết lập next-auth + env.' },
+          { order: 3, title: 'Deploy', content: 'Build và chạy qua PM2 + Nginx.' },
+        ],
+      },
+    },
+  })
+
+  const postCount = await prisma.post.count()
+  const guideCount = await prisma.guide.count()
+  console.log(`Seed complete. Total posts: ${postCount}, guides: ${guideCount}`)
 }
 
 main()

@@ -25,5 +25,21 @@
 - D1-07 hiện **chưa parse MDX đầy đủ**, đang hiển thị content dạng plain/preformatted.
 - D1-03 dùng `prisma db push` do hạn chế quyền shadow DB, sẽ chuẩn hóa migration ở giai đoạn deploy.
 
+## ✅ Day 2 Status
+- [x] D2-01 Schema Guide + Step + Category
+- [x] D2-02 /guides filter + search
+- [x] D2-03 /guides/[slug] step-by-step + progress bar
+- [x] D2-04 API CRUD post + guide (auth guard)
+- [x] D2-05 Admin panel /admin (create/list/publish/delete)
+- [x] D2-06 MDX/markdown editor (textarea + preview)
+- [x] D2-07 Upload ảnh vào /public/uploads
+- [x] D2-08 Rate limiting middleware
+- [x] D2-09 Security headers + CSRF token check
+- [x] D2-10 Cập nhật env staging template
+
+## Notes
+- Luồng edit hiện tại là edit nhanh qua API PATCH payload; UI tập trung create/publish/delete để giữ tốc độ MVP.
+- Rate limit dùng in-memory middleware (đủ cho single-instance; sẽ thay Redis/Upstash nếu scale nhiều instance).
+
 ## Next Focus
-- Chuyển sang Day 2: D2-01 Schema Guide/Step/Category.
+- Chuyển sang Day 3: Deploy automation + UAT + backup/ops.
