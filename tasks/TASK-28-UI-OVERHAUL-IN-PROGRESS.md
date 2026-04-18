@@ -34,6 +34,7 @@ Nâng cấp giao diện website BlogMMO theo hướng hiện đại, đồng b�
 - [x] UI QA checklist run (360/390/430/768) + overflow fix cho header mobile.
 - [x] Reader-first UI/UX plan cho trải nghiệm đọc blog đã được tạo (`docs/UI_UX_READER_PLAN.md`).
 - [x] Reader UX Phase A implemented (article layout + reading progress + reading time + back-to-blog).
+- [x] Reader UX Phase B implemented (markdown renderer + TOC + related posts + CTA cuối bài).
 - [~] Update docs + final commit (đang cập nhật dần theo từng batch).
 
 ## Notes for tomorrow report

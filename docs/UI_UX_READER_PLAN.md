@@ -29,10 +29,10 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 - LCP page blog detail không tệ hơn baseline hiện tại
 
 ### Phase B — Content render & navigation (P1)
-- [ ] Nâng renderer từ plain/pre -> markdown render chuẩn (ít nhất heading/list/link/code block)
-- [ ] Tạo Table of Contents tự động theo heading H2/H3
-- [ ] Khối “Bài liên quan” (theo tags/category)
-- [ ] CTA cuối bài: “Đọc guide liên quan” + link RSS
+- [x] Nâng renderer từ plain/pre -> markdown render chuẩn (heading/list/link/code block cơ bản)
+- [x] Tạo Table of Contents tự động theo heading H2/H3
+- [x] Khối “Bài liên quan” (theo tags)
+- [x] CTA cuối bài: “Đọc guide liên quan” + link RSS
 
 **DoD B**
 - Người dùng có thể đọc, scan nhanh (TOC), và đi tiếp ít nhất 1 nội dung khác.
@@ -69,4 +69,5 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 ## Status
 - ✅ Plan reviewed and approved direction: reader-first UX for blog.
 - ✅ Phase A implemented (ArticleLayout + ReadingProgress + reading metadata/back navigation).
-- ⏳ Next: Phase B (markdown renderer + TOC + related posts CTA).
+- ✅ Phase B implemented (markdown render + TOC + related posts + CTA).
+- ⏳ Next: Phase C (author/share/trust enhancements).
