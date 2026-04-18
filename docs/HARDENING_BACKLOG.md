@@ -46,6 +46,10 @@
 5. **Next.js security patch upgrade**
    - Upgrade to patched version
    - full regression run (`test`, `build`, smoke e2e)
+   - **Status:**
+     - ✅ Upgraded to `next@14.2.35` + `eslint-config-next@14.2.35`
+     - ✅ Full regression pass (unit/build/e2e)
+     - ✅ Production rollout + health checks pass
 
 ### P2 — within 7 days
 6. **Observability uplift**
