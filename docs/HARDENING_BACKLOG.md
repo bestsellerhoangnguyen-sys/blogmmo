@@ -30,6 +30,7 @@
      - ✅ Violation analysis completed: inline script violations confirmed on `/`, `/blog`, `/guides`
      - ✅ Nonce trial executed (middleware + layout propagation)
      - ⚠️ Next runtime script chunks still reported blocked under strict nonce report-only
+     - ✅ Daily CSP monitoring cron + baseline summary established
      - ⏳ Final enforce switch pending deeper framework-compatible nonce strategy
 
 4. **Add integration tests for API security paths**

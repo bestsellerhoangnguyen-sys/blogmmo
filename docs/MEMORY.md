@@ -49,6 +49,7 @@
 - Đã chạy thu thập report production và xác nhận vi phạm `script-src-elem` do inline script trên các trang chính; quyết định giữ report-only, chưa enforce cứng cho đến khi hoàn thành nonce/hash migration.
 - Đã thử nonce rollout (middleware + layout + analytics nonce) nhưng report production cho thấy Next runtime chunk scripts vẫn bị chặn trong strict nonce policy; cần chiến lược nonce tương thích framework hơn trước khi enforce.
 - Đã điều chỉnh CSP report-only về baseline tương thích Next (`script-src 'self'`, `style-src 'self'`) để giảm nhiễu từ runtime chunk và tập trung bắt inline violations thực sự.
+- Đã thiết lập monitoring CSP tự động hằng ngày (cron + script tổng hợp) và tạo baseline snapshot để theo dõi xu hướng vi phạm trước khi tính bước enforce tiếp theo.
 - Đã hoàn tất bổ sung e2e API security paths cho authenticated success + invalid CSRF (403), nâng coverage security flow theo backlog P1.
 - Đã hoàn tất nâng cấp Next.js patch lên `14.2.35` và rollout production thành công sau full regression (unit/build/e2e).
 - Đã bổ sung e2e integration tests cho API security paths trên production: unauthorized 401, auth burst rate-limit 429, và Retry-After header.
