@@ -27,7 +27,8 @@
    - **Status:**
      - ✅ Report-Only strict CSP enabled (no unsafe-inline)
      - ✅ Violation collection endpoint added (`/api/csp-report`)
-     - ⏳ Final enforce switch pending after violation review
+     - ✅ Violation analysis completed: inline script violations confirmed on `/`, `/blog`, `/guides`
+     - ⏳ Final enforce switch pending nonce/hash migration
 
 4. **Add integration tests for API security paths**
    - posts/guides create/update/delete:
