@@ -42,3 +42,4 @@
 - Đã bổ sung tự động hóa e2e smoke bằng Playwright + GitHub workflow; fix cấu hình Vitest để chỉ chạy test nội bộ và tránh quét node_modules.
 - Re-deploy production sau cập nhật Phase 2 continuation thành công, health checks vẫn xanh.
 - Bổ sung tiếp Phase 2: rate-limit auth/API có thể tune qua env + trả Retry-After; thêm endpoint `/api/ops/storage` để admin kiểm tra trạng thái S3 runtime.
+- Đã thêm unit test cho storage health và chạy e2e smoke live trên production thành công (3/3 pass).
