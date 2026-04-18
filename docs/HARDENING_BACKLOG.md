@@ -24,6 +24,10 @@
 3. **Remove CSP `unsafe-inline`**
    - Move inline usages to nonce/hash-compatible pattern
    - Re-test auth/admin screens and dynamic components
+   - **Status:**
+     - ✅ Report-Only strict CSP enabled (no unsafe-inline)
+     - ✅ Violation collection endpoint added (`/api/csp-report`)
+     - ⏳ Final enforce switch pending after violation review
 
 4. **Add integration tests for API security paths**
    - posts/guides create/update/delete:

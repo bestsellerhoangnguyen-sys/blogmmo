@@ -45,3 +45,4 @@
 - Đã thêm unit test cho storage health và chạy e2e smoke live trên production thành công (3/3 pass).
 - Đã tổng hợp báo cáo hoàn tất Phase 2 (`PHASE2_COMPLETION_REPORT.md`) và tạo hardening backlog có timeline (`HARDENING_BACKLOG.md`).
 - P0 được đẩy tiếp: đã rotate admin credential production, chạy unit/build/e2e/lighthouse thủ công và ghi evidence; phụ thuộc còn lại là rotate S3 IAM key mới.
+- P1 CSP hardening đã bắt đầu theo safe rollout: bật CSP strict ở chế độ Report-Only + endpoint nhận báo cáo (`/api/csp-report`) trước khi chuyển enforce cứng.

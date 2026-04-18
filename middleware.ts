@@ -38,10 +38,14 @@ export function middleware(req: NextRequest) {
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.headers.set(
-    "Content-Security-Policy",
-    "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; object-src 'none';"
-  );
+  const cspEnforced =
+    "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; object-src 'none';";
+
+  const cspReportOnly =
+    "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self'; connect-src 'self' https:; object-src 'none'; report-uri /api/csp-report;";
+
+  res.headers.set("Content-Security-Policy", cspEnforced);
+  res.headers.set("Content-Security-Policy-Report-Only", cspReportOnly);
   return res;
 }
 
