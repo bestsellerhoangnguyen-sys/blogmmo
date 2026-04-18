@@ -8,6 +8,10 @@ import { Breadcrumbs, EmptyState, PageHeader, Surface } from "@/components/ui";
 type Post = { id: string; title: string; slug: string; published: boolean; excerpt?: string | null; content: string };
 type Guide = { id: string; title: string; slug: string; published: boolean; summary?: string | null };
 
+const inputClass = "w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-500 dark:focus:ring-zinc-800";
+const actionBtnClass = "rounded-xl border border-zinc-300 px-3 py-1.5 text-sm transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800";
+const primaryBtnClass = "rounded-xl bg-black px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200";
+
 function getCsrfTokenFromCookie() {
   return document.cookie
     .split("; ")
@@ -137,7 +141,13 @@ export default function AdminPage() {
   }
 
   if (status === "loading") return <main className="text-sm text-zinc-500">Loading...</main>;
-  if (!session) return <main className="space-y-2"><h1 className="text-2xl font-bold">Admin</h1><p>Vui lòng đăng nhập để truy cập.</p></main>;
+  if (!session)
+    return (
+      <main className="space-y-2">
+        <h1 className="text-2xl font-bold">Admin</h1>
+        <p>Vui lòng đăng nhập để truy cập.</p>
+      </main>
+    );
 
   return (
     <main className="space-y-8">
@@ -146,83 +156,83 @@ export default function AdminPage() {
 
       <Surface>
         <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Tạo post mới</h2>
-        <h2 className="text-xl font-semibold">Tạo post mới</h2>
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} />
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="slug-bai-viet" value={postSlug} onChange={(e) => setPostSlug(e.target.value)} />
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Excerpt" value={postExcerpt} onChange={(e) => setPostExcerpt(e.target.value)} />
-        <MdxEditor value={postContent} onChange={setPostContent} />
-        <div className="flex items-center gap-3">
-          <label className="rounded border px-3 py-2 text-sm dark:border-white/20">
-            {uploading ? "Uploading..." : "Upload image"}
-            <input
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) uploadImage(f);
-              }}
-            />
-          </label>
-          <button className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black" onClick={createPost}>Create post</button>
-        </div>
-        </div>
-      </Surface>
-
-      <Surface>
-        <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Danh sách posts</h2>
-        {posts.map((post) => (
-          <div key={post.id} className="flex items-center justify-between rounded border p-3 dark:border-white/20">
-            <div>
-              <p className="font-medium">{post.title}</p>
-              <p className="text-sm text-gray-500">/{post.slug}</p>
-            </div>
-            <div className="flex gap-2">
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => togglePost(post.id, post.published)}>
-                {post.published ? "Unpublish" : "Publish"}
-              </button>
-              <button className="rounded border px-3 py-1 text-sm text-red-600" onClick={() => deletePost(post.id)}>
-                Delete
-              </button>
-            </div>
+          <h2 className="text-xl font-semibold">Tạo post mới</h2>
+          <input className={inputClass} placeholder="Title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} />
+          <input className={inputClass} placeholder="slug-bai-viet" value={postSlug} onChange={(e) => setPostSlug(e.target.value)} />
+          <input className={inputClass} placeholder="Excerpt" value={postExcerpt} onChange={(e) => setPostExcerpt(e.target.value)} />
+          <MdxEditor value={postContent} onChange={setPostContent} />
+          <div className="flex flex-wrap items-center gap-3">
+            <label className={actionBtnClass}>
+              {uploading ? "Uploading..." : "Upload image"}
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) uploadImage(f);
+                }}
+              />
+            </label>
+            <button className={primaryBtnClass} onClick={createPost}>Create post</button>
           </div>
-        ))}
         </div>
       </Surface>
 
       <Surface>
         <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Tạo guide mới</h2>
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Guide title" value={guideTitle} onChange={(e) => setGuideTitle(e.target.value)} />
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="guide-slug" value={guideSlug} onChange={(e) => setGuideSlug(e.target.value)} />
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Summary" value={guideSummary} onChange={(e) => setGuideSummary(e.target.value)} />
-        <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Category slug" value={guideCategory} onChange={(e) => setGuideCategory(e.target.value)} />
-        <button className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black" onClick={createGuide}>Create guide</button>
+          <h2 className="text-xl font-semibold">Danh sách posts</h2>
+          {posts.length === 0 ? <EmptyState title="Chưa có post" subtitle="Tạo bài viết đầu tiên để bắt đầu." /> : null}
+          {posts.map((post) => (
+            <div key={post.id} className="flex flex-col gap-3 rounded-xl border p-3 dark:border-white/20 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium">{post.title}</p>
+                <p className="text-sm text-gray-500">/{post.slug}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button className={actionBtnClass} onClick={() => togglePost(post.id, post.published)}>
+                  {post.published ? "Unpublish" : "Publish"}
+                </button>
+                <button className={`${actionBtnClass} text-red-600 dark:text-red-400`} onClick={() => deletePost(post.id)}>
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </Surface>
 
       <Surface>
         <div className="space-y-3">
-        <h2 className="text-xl font-semibold">Danh sách guides</h2>
-        {guides.length === 0 ? <EmptyState title="Chưa có guide" subtitle="Tạo guide đầu tiên để bắt đầu." /> : null}
-        {guides.map((g) => (
-          <div key={g.id} className="flex items-center justify-between rounded border p-3 dark:border-white/20">
-            <div>
-              <p className="font-medium">{g.title}</p>
-              <p className="text-sm text-gray-500">/{g.slug}</p>
+          <h2 className="text-xl font-semibold">Tạo guide mới</h2>
+          <input className={inputClass} placeholder="Guide title" value={guideTitle} onChange={(e) => setGuideTitle(e.target.value)} />
+          <input className={inputClass} placeholder="guide-slug" value={guideSlug} onChange={(e) => setGuideSlug(e.target.value)} />
+          <input className={inputClass} placeholder="Summary" value={guideSummary} onChange={(e) => setGuideSummary(e.target.value)} />
+          <input className={inputClass} placeholder="Category slug" value={guideCategory} onChange={(e) => setGuideCategory(e.target.value)} />
+          <button className={primaryBtnClass} onClick={createGuide}>Create guide</button>
+        </div>
+      </Surface>
+
+      <Surface>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Danh sách guides</h2>
+          {guides.length === 0 ? <EmptyState title="Chưa có guide" subtitle="Tạo guide đầu tiên để bắt đầu." /> : null}
+          {guides.map((g) => (
+            <div key={g.id} className="flex flex-col gap-3 rounded-xl border p-3 dark:border-white/20 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium">{g.title}</p>
+                <p className="text-sm text-gray-500">/{g.slug}</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button className={actionBtnClass} onClick={() => toggleGuide(g.id, g.published)}>
+                  {g.published ? "Unpublish" : "Publish"}
+                </button>
+                <button className={`${actionBtnClass} text-red-600 dark:text-red-400`} onClick={() => deleteGuide(g.id)}>
+                  Delete
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              <button className="rounded border px-3 py-1 text-sm" onClick={() => toggleGuide(g.id, g.published)}>
-                {g.published ? "Unpublish" : "Publish"}
-              </button>
-              <button className="rounded border px-3 py-1 text-sm text-red-600" onClick={() => deleteGuide(g.id)}>
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+          ))}
         </div>
       </Surface>
     </main>
