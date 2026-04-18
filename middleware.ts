@@ -11,6 +11,10 @@ function rateLimitKey(req: NextRequest) {
   return `${ip}:${req.nextUrl.pathname}`;
 }
 
+function createNonce() {
+  return btoa(crypto.randomUUID());
+}
+
 export function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith("/api")) {
     const isAuthEndpoint = req.nextUrl.pathname.startsWith("/api/auth");
@@ -34,7 +38,15 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  const res = NextResponse.next();
+  const requestHeaders = new Headers(req.headers);
+  const nonce = createNonce();
+  requestHeaders.set("x-nonce", nonce);
+
+  const res = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
   res.headers.set("X-Frame-Options", "DENY");
   res.headers.set("X-Content-Type-Options", "nosniff");
   res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -42,10 +54,11 @@ export function middleware(req: NextRequest) {
     "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; object-src 'none';";
 
   const cspReportOnly =
-    "default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self'; connect-src 'self' https:; object-src 'none'; report-uri /api/csp-report;";
+    `default-src 'self'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; script-src 'self' 'nonce-${nonce}' 'strict-dynamic'; style-src 'self'; connect-src 'self' https:; object-src 'none'; report-uri /api/csp-report;`;
 
   res.headers.set("Content-Security-Policy", cspEnforced);
   res.headers.set("Content-Security-Policy-Report-Only", cspReportOnly);
+  res.headers.set("x-nonce", nonce);
   return res;
 }
 

@@ -1,6 +1,6 @@
 import Script from "next/script";
 
-export function Analytics() {
+export function Analytics({ nonce }: { nonce?: string }) {
   const scriptSrc = process.env.ANALYTICS_SCRIPT_URL;
   const websiteId = process.env.ANALYTICS_WEBSITE_ID;
 
@@ -12,6 +12,7 @@ export function Analytics() {
       src={scriptSrc}
       data-website-id={websiteId}
       strategy="afterInteractive"
+      nonce={nonce}
     />
   );
 }

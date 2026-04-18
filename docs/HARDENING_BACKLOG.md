@@ -28,7 +28,9 @@
      - ✅ Report-Only strict CSP enabled (no unsafe-inline)
      - ✅ Violation collection endpoint added (`/api/csp-report`)
      - ✅ Violation analysis completed: inline script violations confirmed on `/`, `/blog`, `/guides`
-     - ⏳ Final enforce switch pending nonce/hash migration
+     - ✅ Nonce trial executed (middleware + layout propagation)
+     - ⚠️ Next runtime script chunks still reported blocked under strict nonce report-only
+     - ⏳ Final enforce switch pending deeper framework-compatible nonce strategy
 
 4. **Add integration tests for API security paths**
    - posts/guides create/update/delete:
