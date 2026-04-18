@@ -11,11 +11,11 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-gradient-to-b from-white to-zinc-50 p-5 dark:border-white/20 dark:from-zinc-900 dark:to-zinc-950 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-2xl border border-black/10 bg-gradient-to-b from-white to-zinc-50 p-4 dark:border-white/20 dark:from-zinc-900 dark:to-zinc-950 sm:flex-row sm:items-center sm:justify-between sm:p-5">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
         {description ? (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">{description}</p>
+          <p className="mt-1 max-w-2xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">{description}</p>
         ) : null}
       </div>
       {actions ? <div className="flex items-center gap-2">{actions}</div> : null}
@@ -43,7 +43,7 @@ export function Breadcrumbs({ items }: { items: { label: string; href?: string }
 }
 
 export function Surface({ children }: { children: ReactNode }) {
-  return <section className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/20 dark:bg-zinc-900">{children}</section>;
+  return <section className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm dark:border-white/20 dark:bg-zinc-900 sm:p-5">{children}</section>;
 }
 
 export function EmptyState({ title, subtitle }: { title: string; subtitle?: string }) {

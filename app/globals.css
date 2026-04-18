@@ -4,7 +4,11 @@
 
 html,
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+body {
+  line-height: 1.55;
 }
 
 @layer utilities {

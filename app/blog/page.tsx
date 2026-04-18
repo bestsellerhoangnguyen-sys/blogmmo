@@ -32,7 +32,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
-    <main className="space-y-6">
+    <main className="space-y-5 sm:space-y-6">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
       <PageHeader
         title="Blog"
@@ -42,16 +42,16 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       {posts.length === 0 ? (
         <EmptyState title="Chưa có bài viết nào" subtitle="Khi có bài publish, danh sách sẽ xuất hiện ở đây." />
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {posts.map((post) => (
             <Surface key={post.id}>
-              <h2 className="text-xl font-semibold">{post.title}</h2>
+              <h2 className="text-lg font-semibold leading-tight sm:text-xl">{post.title}</h2>
               <p className="mt-1 text-sm text-gray-500">
                 {post.publishedAt
                   ? new Date(post.publishedAt).toLocaleDateString("vi-VN")
                   : "Chưa publish"}
               </p>
-              <p className="mt-3 text-gray-700 dark:text-gray-200">
+              <p className="mt-3 text-sm leading-relaxed text-gray-700 dark:text-gray-200 sm:text-base">
                 {post.excerpt ?? "Chưa có mô tả ngắn."}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -70,10 +70,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between border-t pt-4 dark:border-white/20">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-4 dark:border-white/20">
         <Link
           href={currentPage > 1 ? `/blog?page=${currentPage - 1}` : "/blog?page=1"}
-          className={`rounded border px-3 py-2 text-sm ${
+          className={`rounded-xl border px-3 py-2 text-sm ${
             currentPage <= 1 ? "pointer-events-none opacity-40" : ""
           }`}
         >
@@ -88,7 +88,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               ? `/blog?page=${currentPage + 1}`
               : `/blog?page=${totalPages}`
           }
-          className={`rounded border px-3 py-2 text-sm ${
+          className={`rounded-xl border px-3 py-2 text-sm ${
             currentPage >= totalPages ? "pointer-events-none opacity-40" : ""
           }`}
         >

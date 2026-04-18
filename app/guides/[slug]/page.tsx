@@ -17,22 +17,22 @@ export default async function GuideDetailPage({ params }: { params: { slug: stri
   if (!guide || !guide.published) notFound();
 
   return (
-    <article className="mx-auto max-w-3xl space-y-4">
+    <article className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Guides", href: "/guides" }, { label: guide.title }]} />
       <GuideProgress />
 
       <Surface>
         <header className="space-y-2 border-b pb-4 dark:border-white/20">
-          <h1 className="text-3xl font-bold">{guide.title}</h1>
+          <h1 className="text-2xl font-bold leading-tight sm:text-3xl">{guide.title}</h1>
           <p className="text-sm text-gray-500">Category: {guide.category.name}</p>
-          <p className="text-gray-700 dark:text-gray-200">{guide.summary}</p>
+          <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-200 sm:text-base">{guide.summary}</p>
         </header>
 
         <ol className="mt-4 space-y-4">
           {guide.steps.map((step) => (
-            <li key={step.id} className="rounded-xl border p-4 dark:border-white/20">
+            <li key={step.id} className="rounded-xl border p-4 dark:border-white/20 sm:p-5">
               <h2 className="text-lg font-semibold">Bước {step.order}: {step.title}</h2>
-              <p className="mt-2 whitespace-pre-wrap text-gray-700 dark:text-gray-200">{step.content}</p>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-gray-700 dark:text-gray-200 sm:text-base">{step.content}</p>
             </li>
           ))}
         </ol>
