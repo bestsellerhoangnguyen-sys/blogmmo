@@ -48,3 +48,4 @@
 - P1 CSP hardening đã bắt đầu theo safe rollout: bật CSP strict ở chế độ Report-Only + endpoint nhận báo cáo (`/api/csp-report`) trước khi chuyển enforce cứng.
 - Đã chạy thu thập report production và xác nhận vi phạm `script-src-elem` do inline script trên các trang chính; quyết định giữ report-only, chưa enforce cứng cho đến khi hoàn thành nonce/hash migration.
 - Đã thử nonce rollout (middleware + layout + analytics nonce) nhưng report production cho thấy Next runtime chunk scripts vẫn bị chặn trong strict nonce policy; cần chiến lược nonce tương thích framework hơn trước khi enforce.
+- Đã bổ sung e2e integration tests cho API security paths trên production: unauthorized 401, auth burst rate-limit 429, và Retry-After header.
