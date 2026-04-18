@@ -37,8 +37,17 @@
 - `systemctl status nginx`
 - `ls -lh /backups | tail`
 - `crontab -l | grep bin_backup_appdb.sh`
+- (after login) `curl -s https://www.sspaitools.com/api/ops/storage` để check S3 bucket health
 
-## 6) Analytics (Umami/Plausible style)
+## 6) Rate limit tuning
+- Env (optional):
+  - `RATE_LIMIT_WINDOW_MS`
+  - `RATE_LIMIT_MAX`
+  - `AUTH_RATE_LIMIT_WINDOW_MS`
+  - `AUTH_RATE_LIMIT_MAX`
+- Khi bị 429, API trả thêm `Retry-After` header.
+
+## 7) Analytics (Umami/Plausible style)
 - Set env:
   - `ANALYTICS_SCRIPT_URL`
   - `ANALYTICS_WEBSITE_ID`

@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const WINDOW_MS = 60 * 1000;
-const MAX_REQUESTS = 120;
-const AUTH_WINDOW_MS = 60 * 1000;
-const AUTH_MAX_REQUESTS = 20;
+const WINDOW_MS = Number(process.env.RATE_LIMIT_WINDOW_MS || 60 * 1000);
+const MAX_REQUESTS = Number(process.env.RATE_LIMIT_MAX || 120);
+const AUTH_WINDOW_MS = Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 60 * 1000);
+const AUTH_MAX_REQUESTS = Number(process.env.AUTH_RATE_LIMIT_MAX || 20);
 const buckets = new Map<string, { count: number; resetAt: number }>();
 
 function rateLimitKey(req: NextRequest) {
@@ -25,7 +25,11 @@ export function middleware(req: NextRequest) {
     } else {
       bucket.count += 1;
       if (bucket.count > maxReq) {
-        return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+        const retryAfter = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));
+        return NextResponse.json(
+          { error: "Too many requests", retryAfterSeconds: retryAfter },
+          { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        );
       }
     }
   }
