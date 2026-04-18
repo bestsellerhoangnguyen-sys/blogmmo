@@ -41,6 +41,7 @@ Move from MVP-complete system to production-grade reliability and maintainabilit
 - Upgrade editor to Tiptap/advanced MDX editor
 - Improve admin edit UX (draft autosave, validation feedback)
 - Add category/tag management UI
+- Add reader-first Blog UI/UX plan and execute in phases (see `docs/UI_UX_READER_PLAN.md`)
 
 ## Immediate next sprint (first 3 tasks)
 1. ✅ **Migration pipeline conversion** (`db push` → `migrate deploy`)  

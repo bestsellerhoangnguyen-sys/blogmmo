@@ -32,6 +32,7 @@ Nâng cấp giao diện website BlogMMO theo hướng hiện đại, đồng b�
 - [x] Mobile-first polish batch 2 (admin form/button states, root/footer spacing).
 - [x] Mobile-first polish batch 3 (typography/spacing Home-Blog-Guides + shared UI scale).
 - [x] UI QA checklist run (360/390/430/768) + overflow fix cho header mobile.
+- [x] Reader-first UI/UX plan cho trải nghiệm đọc blog đã được tạo (`docs/UI_UX_READER_PLAN.md`).
 - [~] Update docs + final commit (đang cập nhật dần theo từng batch).
 
 ## Notes for tomorrow report
