@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { siteConfig } from "@/lib/site";
-import { Breadcrumbs, Pill, Surface } from "@/components/ui";
+import { ArticleLayout } from "@/components/article-layout";
+import { ReadingProgress } from "@/components/reading-progress";
 
 type BlogDetailProps = {
   params: { slug: string };
@@ -49,33 +50,23 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
 
   if (!post || !post.published) notFound();
 
+  const wordCount = (post.content || "").trim().split(/\s+/).filter(Boolean).length;
+  const readingMinutes = Math.max(1, Math.ceil(wordCount / 220));
+
   return (
-    <article className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: post.title }]} />
-
-      <Surface>
-        <header className="space-y-2 border-b pb-4 dark:border-white/20">
-          <h1 className="text-2xl font-bold leading-tight sm:text-3xl">{post.title}</h1>
-          <p className="text-sm text-gray-500">
-            {post.publishedAt
-              ? new Date(post.publishedAt).toLocaleString("vi-VN")
-              : "Draft"}
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {post.tags.map((tag) => (
-              <Pill key={tag.id}>#{tag.name}</Pill>
-            ))}
-          </div>
-        </header>
-
-        <p className="mt-4 text-base leading-relaxed text-gray-700 dark:text-gray-200 sm:text-lg">{post.excerpt}</p>
-
-        <section className="prose mt-4 max-w-none dark:prose-invert">
-          <pre className="whitespace-pre-wrap rounded-lg border bg-gray-50 p-4 text-sm dark:border-white/20 dark:bg-zinc-950">
-            {post.content}
-          </pre>
-        </section>
-      </Surface>
-    </article>
+    <>
+      <ReadingProgress />
+      <ArticleLayout
+        title={post.title}
+        excerpt={post.excerpt}
+        publishedAt={post.publishedAt}
+        readingMinutes={readingMinutes}
+        tags={post.tags.map((tag) => tag.name)}
+      >
+        <pre className="whitespace-pre-wrap rounded-lg border bg-gray-50 p-4 text-sm dark:border-white/20 dark:bg-zinc-950">
+          {post.content}
+        </pre>
+      </ArticleLayout>
+    </>
   );
 }

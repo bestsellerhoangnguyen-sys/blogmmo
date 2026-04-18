@@ -13,15 +13,15 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 ## Proposed rollout (reader-first)
 
 ### Phase A — Foundation reading UI (P0)
-- [ ] Tạo `ArticleLayout` component:
+- [x] Tạo `ArticleLayout` component:
   - max-width tối ưu long-form (~68ch)
   - spacing chuẩn heading/paragraph/list/code/quote
   - sticky progress bar theo scroll
-- [ ] Bổ sung metadata hiển thị:
+- [x] Bổ sung metadata hiển thị:
   - publish date
   - reading time (ước lượng theo word count)
   - tags clickable
-- [ ] Thêm “Back to Blog” + breadcrumb tối ưu mobile
+- [x] Thêm “Back to Blog” + breadcrumb tối ưu mobile
 
 **DoD A**
 - Blog detail dễ đọc trên 360/390/430/768
@@ -68,4 +68,5 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 
 ## Status
 - ✅ Plan reviewed and approved direction: reader-first UX for blog.
-- ⏳ Ready to execute Phase A immediately.
+- ✅ Phase A implemented (ArticleLayout + ReadingProgress + reading metadata/back navigation).
+- ⏳ Next: Phase B (markdown renderer + TOC + related posts CTA).
