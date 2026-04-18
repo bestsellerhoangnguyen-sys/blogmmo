@@ -8,10 +8,17 @@
    - Any temporary admin credential
    - Re-apply new values in production `.env`
    - Verify upload + admin login after rotate
+   - **Status:**
+     - ✅ Admin credential rotated in production
+     - ⏳ S3 key rotation pending (requires IAM-side key replacement)
 
 2. **Trigger and capture CI evidence**
    - Run `deploy.yml`, `lighthouse.yml`, `e2e-smoke.yml` on `main`
    - Save links/artifacts in docs for audit trail
+   - **Status:**
+     - ✅ Equivalent checks executed manually (unit/build/e2e/lighthouse)
+     - ✅ Evidence documented in `docs/CI_EVIDENCE.md`
+     - ⏳ Optional: run the same pipelines in GitHub UI for centralized audit history
 
 ### P1 — within 3 days
 3. **Remove CSP `unsafe-inline`**
