@@ -53,5 +53,15 @@
 - [x] D3-09 Analytics integration (env-driven)
 - [x] D3-10 Runbook finalize
 
+## ✅ Phase 2 Status
+- [x] Migration pipeline moved to `migrate deploy`
+- [x] S3-ready upload with production S3 configuration applied
+- [x] Auth/API rate-limit hardening + Retry-After
+- [x] CSP tightened (additional directives)
+- [x] Admin password rotated in production
+- [x] Storage ops health endpoint added
+- [x] Unit tests extended (storage health)
+- [x] Live e2e smoke pass (3/3)
+
 ## Next Focus
-- Chạy GitHub Actions thực tế (deploy/lighthouse) và chốt report CI links.
+- Execute hardening backlog P0/P1 (`docs/HARDENING_BACKLOG.md`) and archive CI evidence links.
