@@ -2,20 +2,24 @@ import Link from "next/link";
 import { AuthControls } from "@/components/auth-controls";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+const navClass =
+  "rounded-full px-3 py-1.5 transition hover:bg-black/5 hover:text-black dark:hover:bg-white/10 dark:hover:text-white";
+
 export function SiteHeader() {
   return (
-    <header className="border-b border-black/10 dark:border-white/20">
-      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-xl font-bold">
+    <header className="sticky top-0 z-30 border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/20 dark:bg-zinc-950/90">
+      <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+        <div className="flex items-center gap-2 sm:gap-4">
+          <Link href="/" className="rounded-full px-2 py-1 text-xl font-black tracking-tight">
             BlogMMO
           </Link>
-          <nav className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
-            <Link href="/blog">Blog</Link>
-            <Link href="/guides">Guides</Link>
+          <nav className="flex items-center gap-1 text-sm text-gray-600 dark:text-gray-300">
+            <Link href="/blog" className={navClass}>Blog</Link>
+            <Link href="/guides" className={navClass}>Guides</Link>
+            <Link href="/admin" className={navClass}>Admin</Link>
           </nav>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           <AuthControls />
         </div>

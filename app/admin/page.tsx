@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { MdxEditor } from "@/components/mdx-editor";
+import { Breadcrumbs, EmptyState, PageHeader, Surface } from "@/components/ui";
 
 type Post = { id: string; title: string; slug: string; published: boolean; excerpt?: string | null; content: string };
 type Guide = { id: string; title: string; slug: string; published: boolean; summary?: string | null };
@@ -135,14 +136,17 @@ export default function AdminPage() {
     await loadData();
   }
 
-  if (status === "loading") return <main>Loading...</main>;
+  if (status === "loading") return <main className="text-sm text-zinc-500">Loading...</main>;
   if (!session) return <main className="space-y-2"><h1 className="text-2xl font-bold">Admin</h1><p>Vui lòng đăng nhập để truy cập.</p></main>;
 
   return (
     <main className="space-y-8">
-      <h1 className="text-3xl font-bold">Admin Panel</h1>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Admin" }]} />
+      <PageHeader title="Admin Panel" description="Quản lý nội dung bài viết và guide." />
 
-      <section className="space-y-3 rounded border p-4 dark:border-white/20">
+      <Surface>
+        <div className="space-y-3">
+        <h2 className="text-xl font-semibold">Tạo post mới</h2>
         <h2 className="text-xl font-semibold">Tạo post mới</h2>
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} />
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="slug-bai-viet" value={postSlug} onChange={(e) => setPostSlug(e.target.value)} />
@@ -163,9 +167,11 @@ export default function AdminPage() {
           </label>
           <button className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black" onClick={createPost}>Create post</button>
         </div>
-      </section>
+        </div>
+      </Surface>
 
-      <section className="space-y-3 rounded border p-4 dark:border-white/20">
+      <Surface>
+        <div className="space-y-3">
         <h2 className="text-xl font-semibold">Danh sách posts</h2>
         {posts.map((post) => (
           <div key={post.id} className="flex items-center justify-between rounded border p-3 dark:border-white/20">
@@ -183,20 +189,24 @@ export default function AdminPage() {
             </div>
           </div>
         ))}
-      </section>
+        </div>
+      </Surface>
 
-      <section className="space-y-3 rounded border p-4 dark:border-white/20">
+      <Surface>
+        <div className="space-y-3">
         <h2 className="text-xl font-semibold">Tạo guide mới</h2>
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Guide title" value={guideTitle} onChange={(e) => setGuideTitle(e.target.value)} />
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="guide-slug" value={guideSlug} onChange={(e) => setGuideSlug(e.target.value)} />
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Summary" value={guideSummary} onChange={(e) => setGuideSummary(e.target.value)} />
         <input className="w-full rounded border p-2 dark:border-white/20 dark:bg-zinc-900" placeholder="Category slug" value={guideCategory} onChange={(e) => setGuideCategory(e.target.value)} />
         <button className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black" onClick={createGuide}>Create guide</button>
-      </section>
+        </div>
+      </Surface>
 
-      <section className="space-y-3 rounded border p-4 dark:border-white/20">
+      <Surface>
+        <div className="space-y-3">
         <h2 className="text-xl font-semibold">Danh sách guides</h2>
-        {guides.length === 0 ? <p className="text-sm text-gray-500">Chưa có guide.</p> : null}
+        {guides.length === 0 ? <EmptyState title="Chưa có guide" subtitle="Tạo guide đầu tiên để bắt đầu." /> : null}
         {guides.map((g) => (
           <div key={g.id} className="flex items-center justify-between rounded border p-3 dark:border-white/20">
             <div>
@@ -213,7 +223,8 @@ export default function AdminPage() {
             </div>
           </div>
         ))}
-      </section>
+        </div>
+      </Surface>
     </main>
   );
 }

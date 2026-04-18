@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Breadcrumbs, EmptyState, PageHeader, Pill, Surface } from "@/components/ui";
 
 type GuidesPageProps = {
   searchParams?: {
@@ -34,9 +35,10 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
 
   return (
     <main className="space-y-6">
-      <h1 className="text-3xl font-bold">Guides</h1>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Guides" }]} />
+      <PageHeader title="Guides" description="Tra cứu hướng dẫn theo danh mục và từ khóa." />
 
-      <form className="grid gap-3 rounded border p-4 dark:border-white/20 sm:grid-cols-3">
+      <form className="grid gap-3 rounded-2xl border p-4 dark:border-white/20 sm:grid-cols-3">
         <input
           name="q"
           defaultValue={q}
@@ -58,19 +60,25 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
         <button className="rounded bg-black px-4 py-2 text-white dark:bg-white dark:text-black">Filter</button>
       </form>
 
-      <div className="grid gap-4">
-        {guides.map((guide) => (
-          <article key={guide.id} className="rounded border p-4 dark:border-white/20">
-            <h2 className="text-xl font-semibold">{guide.title}</h2>
-            <p className="text-sm text-gray-500">Category: {guide.category.name}</p>
-            <p className="mt-2 text-gray-700 dark:text-gray-200">{guide.summary ?? "No summary"}</p>
-            <p className="mt-1 text-xs text-gray-500">{guide.steps.length} steps</p>
-            <Link href={`/guides/${guide.slug}`} className="mt-3 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400">
-              Xem hướng dẫn →
-            </Link>
-          </article>
-        ))}
-      </div>
+      {guides.length === 0 ? (
+        <EmptyState title="Không có guide phù hợp" subtitle="Thử đổi từ khóa hoặc category để tìm lại." />
+      ) : (
+        <div className="grid gap-4">
+          {guides.map((guide) => (
+            <Surface key={guide.id}>
+              <h2 className="text-xl font-semibold">{guide.title}</h2>
+              <p className="text-sm text-gray-500">Category: {guide.category.name}</p>
+              <p className="mt-2 text-gray-700 dark:text-gray-200">{guide.summary ?? "No summary"}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <Pill>{guide.steps.length} steps</Pill>
+              </div>
+              <Link href={`/guides/${guide.slug}`} className="mt-3 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400">
+                Xem hướng dẫn →
+              </Link>
+            </Surface>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

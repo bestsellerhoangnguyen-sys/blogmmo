@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import { Breadcrumbs, EmptyState, PageHeader, Pill, Surface } from "@/components/ui";
 
 const PAGE_SIZE = 5;
 
@@ -32,44 +33,42 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   return (
     <main className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Blog</h1>
-        <p className="mt-2 text-gray-600 dark:text-gray-300">
-          Danh sách bài viết đã publish ({total} bài).
-        </p>
-      </div>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
+      <PageHeader
+        title="Blog"
+        description={`Danh sách bài viết đã publish (${total} bài).`}
+      />
 
-      <div className="grid gap-4">
-        {posts.map((post) => (
-          <article key={post.id} className="rounded-lg border p-4 dark:border-white/20">
-            <h2 className="text-xl font-semibold">{post.title}</h2>
-            <p className="mt-1 text-sm text-gray-500">
-              {post.publishedAt
-                ? new Date(post.publishedAt).toLocaleDateString("vi-VN")
-                : "Chưa publish"}
-            </p>
-            <p className="mt-3 text-gray-700 dark:text-gray-200">
-              {post.excerpt ?? "Chưa có mô tả ngắn."}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="rounded-full border px-2 py-1 text-xs dark:border-white/20"
-                >
-                  #{tag.name}
-                </span>
-              ))}
-            </div>
-            <Link
-              href={`/blog/${post.slug}`}
-              className="mt-4 inline-block text-sm text-blue-600 hover:underline dark:text-blue-400"
-            >
-              Đọc chi tiết →
-            </Link>
-          </article>
-        ))}
-      </div>
+      {posts.length === 0 ? (
+        <EmptyState title="Chưa có bài viết nào" subtitle="Khi có bài publish, danh sách sẽ xuất hiện ở đây." />
+      ) : (
+        <div className="grid gap-4">
+          {posts.map((post) => (
+            <Surface key={post.id}>
+              <h2 className="text-xl font-semibold">{post.title}</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                {post.publishedAt
+                  ? new Date(post.publishedAt).toLocaleDateString("vi-VN")
+                  : "Chưa publish"}
+              </p>
+              <p className="mt-3 text-gray-700 dark:text-gray-200">
+                {post.excerpt ?? "Chưa có mô tả ngắn."}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Pill key={tag.id}>#{tag.name}</Pill>
+                ))}
+              </div>
+              <Link
+                href={`/blog/${post.slug}`}
+                className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+              >
+                Đọc chi tiết →
+              </Link>
+            </Surface>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center justify-between border-t pt-4 dark:border-white/20">
         <Link

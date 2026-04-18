@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { siteConfig } from "@/lib/site";
+import { Breadcrumbs, Pill, Surface } from "@/components/ui";
 
 type BlogDetailProps = {
   params: { slug: string };
@@ -50,29 +51,31 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
 
   return (
     <article className="mx-auto max-w-3xl space-y-4">
-      <header className="space-y-2 border-b pb-4 dark:border-white/20">
-        <h1 className="text-3xl font-bold">{post.title}</h1>
-        <p className="text-sm text-gray-500">
-          {post.publishedAt
-            ? new Date(post.publishedAt).toLocaleString("vi-VN")
-            : "Draft"}
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
-            <span key={tag.id} className="rounded-full border px-2 py-1 text-xs dark:border-white/20">
-              #{tag.name}
-            </span>
-          ))}
-        </div>
-      </header>
+      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: post.title }]} />
 
-      <p className="text-lg text-gray-700 dark:text-gray-200">{post.excerpt}</p>
+      <Surface>
+        <header className="space-y-2 border-b pb-4 dark:border-white/20">
+          <h1 className="text-3xl font-bold leading-tight">{post.title}</h1>
+          <p className="text-sm text-gray-500">
+            {post.publishedAt
+              ? new Date(post.publishedAt).toLocaleString("vi-VN")
+              : "Draft"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {post.tags.map((tag) => (
+              <Pill key={tag.id}>#{tag.name}</Pill>
+            ))}
+          </div>
+        </header>
 
-      <section className="prose max-w-none dark:prose-invert">
-        <pre className="whitespace-pre-wrap rounded-lg border bg-gray-50 p-4 text-sm dark:border-white/20 dark:bg-zinc-900">
-          {post.content}
-        </pre>
-      </section>
+        <p className="mt-4 text-lg text-gray-700 dark:text-gray-200">{post.excerpt}</p>
+
+        <section className="prose mt-4 max-w-none dark:prose-invert">
+          <pre className="whitespace-pre-wrap rounded-lg border bg-gray-50 p-4 text-sm dark:border-white/20 dark:bg-zinc-950">
+            {post.content}
+          </pre>
+        </section>
+      </Surface>
     </article>
   );
 }
