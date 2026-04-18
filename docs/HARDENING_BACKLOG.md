@@ -40,7 +40,8 @@
      - rate-limited 429
    - **Status:**
      - ✅ Added production e2e integration tests for unauthorized 401 + rate-limit 429 + Retry-After
-     - ⏳ Authenticated success + explicit CSRF 403 fixture remains for next iteration
+     - ✅ Added authenticated success + explicit CSRF 403 fixture (requires admin test env)
+     - ✅ Scenario set now covers core security behavior for API mutation flow
 
 5. **Next.js security patch upgrade**
    - Upgrade to patched version
