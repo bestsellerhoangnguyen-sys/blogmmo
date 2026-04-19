@@ -1,4 +1,4 @@
-# TASK-28 — UI Overhaul (IN PROGRESS)
+# TASK-28 — UI Overhaul (COMPLETED)
 
 ## Owner
 - Main session (direct execution, no sub-agent)
@@ -36,7 +36,7 @@ Nâng cấp giao diện website BlogMMO theo hướng hiện đại, đồng b�
 - [x] Reader UX Phase A implemented (article layout + reading progress + reading time + back-to-blog).
 - [x] Reader UX Phase B implemented (markdown renderer + TOC + related posts + CTA cuối bài).
 - [x] Reader UX Phase C core implemented (author box + share actions + updated badge).
-- [~] Update docs + final commit (đang cập nhật dần theo từng batch).
+- [x] Final docs/handover summary completed (`docs/UI_UX_FINAL_SUMMARY.md`).
 
 ## Notes for tomorrow report
 - Đã xác nhận sẽ thực hiện trực tiếp trong main session.
@@ -47,3 +47,4 @@ Nâng cấp giao diện website BlogMMO theo hướng hiện đại, đồng b�
 - Batch polish tiếp theo: chuẩn hóa input/button states ở Admin, tối ưu layout padding mobile (`app/layout.tsx`) và footer responsive (`components/site-footer.tsx`); lint + build pass.
 - Batch 3: tinh chỉnh typography/spacing cho Home-Blog-Guides và nâng scale component dùng chung (`components/ui.tsx`, `app/globals.css`), lint + build pass.
 - Đã chạy UI QA checklist tự động (`scripts/ui_qa_check.mjs`) với viewport 360/390/430/768. Ban đầu phát hiện overflow-x từ header mobile, đã fix lại bố cục header; re-run QA cho kết quả NO overflow tất cả trang chính (`/`, `/blog`, `/guides`, `/admin`, `/login`).
+- Reader UX đã hoàn thiện qua 3 phase (A/B/C core). Task này được chốt complete.
