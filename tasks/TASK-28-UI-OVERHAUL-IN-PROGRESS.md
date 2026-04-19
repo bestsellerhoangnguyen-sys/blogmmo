@@ -35,6 +35,7 @@ Nâng cấp giao diện website BlogMMO theo hướng hiện đại, đồng b�
 - [x] Reader-first UI/UX plan cho trải nghiệm đọc blog đã được tạo (`docs/UI_UX_READER_PLAN.md`).
 - [x] Reader UX Phase A implemented (article layout + reading progress + reading time + back-to-blog).
 - [x] Reader UX Phase B implemented (markdown renderer + TOC + related posts + CTA cuối bài).
+- [x] Reader UX Phase C core implemented (author box + share actions + updated badge).
 - [~] Update docs + final commit (đang cập nhật dần theo từng batch).
 
 ## Notes for tomorrow report

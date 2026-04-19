@@ -7,6 +7,8 @@ import { ArticleLayout } from "@/components/article-layout";
 import { ReadingProgress } from "@/components/reading-progress";
 import { Toc } from "@/components/toc";
 import { extractToc, renderMarkdown } from "@/lib/markdown";
+import { ShareActions } from "@/components/share-actions";
+import { AuthorBox } from "@/components/author-box";
 
 type BlogDetailProps = {
   params: { slug: string };
@@ -82,8 +84,10 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
           title={post.title}
           excerpt={post.excerpt}
           publishedAt={post.publishedAt}
+          updatedAt={post.updatedAt}
           readingMinutes={readingMinutes}
           tags={post.tags.map((tag) => tag.name)}
+          actions={<ShareActions title={post.title} url={`${siteConfig.url}/blog/${post.slug}`} />}
         >
           <div dangerouslySetInnerHTML={{ __html: html }} />
 
@@ -111,6 +115,8 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
               </div>
             </div>
           ) : null}
+
+          <AuthorBox updatedAt={post.updatedAt} publishedAt={post.publishedAt} />
         </ArticleLayout>
 
         <div className="lg:sticky lg:top-24">

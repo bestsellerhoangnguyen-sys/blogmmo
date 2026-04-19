@@ -6,8 +6,10 @@ type ArticleLayoutProps = {
   title: string;
   excerpt?: string | null;
   publishedAt?: Date | null;
+  updatedAt?: Date;
   readingMinutes: number;
   tags?: string[];
+  actions?: ReactNode;
   children: ReactNode;
 };
 
@@ -15,10 +17,17 @@ export function ArticleLayout({
   title,
   excerpt,
   publishedAt,
+  updatedAt,
   readingMinutes,
   tags = [],
+  actions,
   children,
 }: ArticleLayoutProps) {
+  const showUpdatedBadge =
+    publishedAt && updatedAt
+      ? updatedAt.getTime() - publishedAt.getTime() > 1000 * 60 * 60 * 24
+      : false;
+
   return (
     <article className="mx-auto max-w-3xl space-y-4 sm:space-y-5">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: title }]} />
@@ -30,9 +39,16 @@ export function ArticleLayout({
             <span>{publishedAt ? new Date(publishedAt).toLocaleString("vi-VN") : "Draft"}</span>
             <span>•</span>
             <span>{readingMinutes} phút đọc</span>
+            {showUpdatedBadge ? (
+              <>
+                <span>•</span>
+                <span className="rounded-full border px-2 py-0.5 text-xs">Updated</span>
+              </>
+            ) : null}
             <span>•</span>
             <Link href="/blog" className="hover:underline">← Quay lại Blog</Link>
           </div>
+          {actions ? <div>{actions}</div> : null}
           {tags.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {tags.map((tag) => (

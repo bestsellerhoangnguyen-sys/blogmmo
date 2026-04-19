@@ -38,9 +38,9 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 - Người dùng có thể đọc, scan nhanh (TOC), và đi tiếp ít nhất 1 nội dung khác.
 
 ### Phase C — Engagement & trust (P2)
-- [ ] Author box + updated timestamp
-- [ ] Copy-link button + share actions
-- [ ] “Last updated” badge khi bài cũ
+- [x] Author box + updated timestamp
+- [x] Copy-link button + share actions
+- [x] “Last updated” badge khi bài cũ
 - [ ] Optional: theme toggle shortcut cho reading mode
 
 **DoD C**
@@ -70,4 +70,4 @@ Tối ưu trải nghiệm **đọc blog** để tăng thời gian đọc, giảm
 - ✅ Plan reviewed and approved direction: reader-first UX for blog.
 - ✅ Phase A implemented (ArticleLayout + ReadingProgress + reading metadata/back navigation).
 - ✅ Phase B implemented (markdown render + TOC + related posts + CTA).
-- ⏳ Next: Phase C (author/share/trust enhancements).
+- ✅ Phase C core implemented (author box + share actions + updated badge).
