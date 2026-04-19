@@ -7,6 +7,7 @@ import { Breadcrumbs, EmptyState, PageHeader, Surface } from "@/components/ui";
 
 type Post = { id: string; title: string; slug: string; published: boolean; excerpt?: string | null; content: string };
 type Guide = { id: string; title: string; slug: string; published: boolean; summary?: string | null };
+type AccountUser = { id: string; email: string; name?: string | null; role: string };
 type PostDraft = { title: string; slug: string; excerpt: string; content: string };
 type GuideDraft = { title: string; slug: string; summary: string };
 
@@ -35,16 +36,28 @@ export default function AdminPage() {
   const [guideSummary, setGuideSummary] = useState("");
   const [guideCategory, setGuideCategory] = useState("general");
   const [error, setError] = useState("");
+  const [users, setUsers] = useState<AccountUser[]>([]);
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
   const [postDraft, setPostDraft] = useState<PostDraft | null>(null);
   const [guideDraft, setGuideDraft] = useState<GuideDraft | null>(null);
 
   async function loadData() {
-    const [pRes, gRes] = await Promise.all([fetch("/api/posts"), fetch("/api/guides")]);
-    const [pData, gData] = await Promise.all([pRes.json(), gRes.json()]);
+    const [pRes, gRes, uRes] = await Promise.all([fetch("/api/posts"), fetch("/api/guides"), fetch("/api/admin/users")]);
+    const [pData, gData, uData] = await Promise.all([pRes.json(), gRes.json(), uRes.json()]);
     setPosts(Array.isArray(pData) ? pData : []);
     setGuides(Array.isArray(gData) ? gData : []);
+    setUsers(Array.isArray(uData) ? uData : []);
+  }
+
+  async function updateUserRole(id: string, role: string) {
+    const token = getCsrfTokenFromCookie();
+    await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-csrf-token": token },
+      body: JSON.stringify({ id, role }),
+    });
+    await loadData();
   }
 
   useEffect(() => {
@@ -351,6 +364,27 @@ export default function AdminPage() {
                 <button className={`${actionBtnClass} text-red-600 dark:text-red-400`} onClick={() => deleteGuide(g.id)}>
                   Delete
                 </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Surface>
+
+      <Surface>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Quản lý tài khoản</h2>
+          {users.length === 0 ? <EmptyState title="Chưa có user" subtitle="User đăng ký sẽ xuất hiện ở đây." /> : null}
+          {users.map((u) => (
+            <div key={u.id} className="flex flex-col gap-2 rounded-xl border p-3 dark:border-white/20 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium">{u.name || u.email}</p>
+                <p className="text-sm text-gray-500">{u.email}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <select className="rounded-xl border p-2 text-sm dark:border-white/20 dark:bg-zinc-900" value={u.role} onChange={(e) => updateUserRole(u.id, e.target.value)}>
+                  <option value="USER">USER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </select>
               </div>
             </div>
           ))}

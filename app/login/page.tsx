@@ -27,7 +27,7 @@ export default function LoginPage() {
 
   return (
     <main className="mx-auto max-w-md p-6">
-      <h1 className="mb-6 text-2xl font-bold">Đăng nhập Admin</h1>
+      <h1 className="mb-6 text-2xl font-bold">Đăng nhập tài khoản</h1>
       <form className="space-y-4" onSubmit={onSubmit}>
         <input
           className="w-full rounded border p-2"
