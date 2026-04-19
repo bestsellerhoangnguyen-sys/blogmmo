@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 
@@ -57,6 +58,10 @@ export default function LoginPage() {
       </button>
 
       {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}
+
+      <p className="mt-4 text-sm text-zinc-600 dark:text-zinc-300">
+        Chưa có tài khoản? <Link href="/register" className="text-blue-600 hover:underline dark:text-blue-400">Tạo tài khoản</Link>
+      </p>
     </main>
   );
 }

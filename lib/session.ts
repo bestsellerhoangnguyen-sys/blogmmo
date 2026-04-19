@@ -13,6 +13,9 @@ export async function requireAdmin() {
   const session = await requireAuth();
   if (!session?.user?.email) return null;
 
+  const role = (session.user as { role?: string }).role;
+  if (role === "ADMIN") return session;
+
   const adminEmail = process.env.AUTH_ADMIN_EMAIL;
   if (!adminEmail) return session;
 

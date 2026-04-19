@@ -6,11 +6,13 @@ Hoàn thiện phần admin theo yêu cầu: tăng tính an toàn vận hành + k
 ## Scope
 - Add structured admin audit logging for sensitive operations
 - Wire audit events into post/guide/upload/storage operations
+- Add account registration flow (UI + API + auth integration)
 - Verify build/tests and production rollout
 - Update handover docs
 
 ## Status
 - [x] Task created
 - [x] Audit logging implementation
+- [x] Account registration implementation (`/register` + `/api/auth/register` + credentials db fallback)
 - [~] Verify + deploy (lint/build done; deploy in progress)
 - [ ] Handover update

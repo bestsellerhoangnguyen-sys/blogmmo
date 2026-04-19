@@ -1,6 +1,8 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
+import { compare } from "bcryptjs";
+import { prisma } from "@/lib/db";
 
 const hasGoogle =
   !!process.env.GOOGLE_CLIENT_ID && !!process.env.GOOGLE_CLIENT_SECRET;
@@ -31,12 +33,26 @@ export const authOptions: NextAuthOptions = {
           credentials.email === adminEmail &&
           credentials.password === adminPassword;
 
-        if (!isValid) return null;
+        if (isValid) {
+          return {
+            id: "admin-local",
+            email: adminEmail,
+            name: "Admin",
+            role: "ADMIN",
+          };
+        }
+
+        const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+        if (!user?.passwordHash) return null;
+
+        const ok = await compare(credentials.password, user.passwordHash);
+        if (!ok) return null;
 
         return {
-          id: "admin-local",
-          email: adminEmail,
-          name: "Admin",
+          id: user.id,
+          email: user.email,
+          name: user.name ?? user.email,
+          role: user.role,
         };
       },
     }),
@@ -54,6 +70,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.email = user.email;
         token.name = user.name;
+        token.role = (user as { role?: string }).role ?? "USER";
       }
       return token;
     },
@@ -61,6 +78,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.email = token.email;
         session.user.name = token.name;
+        (session.user as { role?: string }).role = (token.role as string) ?? "USER";
       }
       return session;
     },

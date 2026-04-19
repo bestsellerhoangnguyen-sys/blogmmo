@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "public"."User"
+ADD COLUMN IF NOT EXISTS "passwordHash" TEXT,
+ADD COLUMN IF NOT EXISTS "role" TEXT NOT NULL DEFAULT 'USER';
