@@ -14,5 +14,5 @@ Hoàn thiện phần admin theo yêu cầu: tăng tính an toàn vận hành + k
 - [x] Task created
 - [x] Audit logging implementation
 - [x] Account registration implementation (`/register` + `/api/auth/register` + credentials db fallback)
-- [~] Verify + deploy (lint/build done; deploy in progress)
-- [ ] Handover update
+- [x] Regression verified (`lint`, `build`, `test:e2e`)
+- [x] Handover update completed

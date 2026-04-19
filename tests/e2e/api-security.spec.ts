@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
-test('unauthorized mutation returns 401', async ({ request }) => {
+test('unauthorized mutation returns 403', async ({ request }) => {
   const res = await request.post('/api/posts', {
     data: { title: 'x', slug: 'x', content: 'x' },
   });
-  expect(res.status()).toBe(401);
+  expect(res.status()).toBe(403);
 });
 
 test('auth endpoint gets rate-limited under burst', async ({ request }) => {
