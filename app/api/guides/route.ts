@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { verifyCsrfToken } from "@/lib/csrf";
+import { logAdminAudit } from "@/lib/admin-audit";
 
 export async function GET() {
   const session = await requireAdmin();
@@ -16,7 +17,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const session = await requireAdmin();
-  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!session) {
+    logAdminAudit({ action: "create", resource: "guide", status: "failure", detail: { reason: "forbidden" } });
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
   if (!verifyCsrfToken(req.headers)) return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
 
   const body = await req.json();
@@ -52,6 +56,15 @@ export async function POST(req: Request) {
       },
     },
     include: { category: true, steps: true },
+  });
+
+  logAdminAudit({
+    actor: session.user?.email,
+    action: "create",
+    resource: "guide",
+    resourceId: guide.id,
+    status: "success",
+    detail: { slug: guide.slug, published: guide.published },
   });
 
   return NextResponse.json(guide, { status: 201 });
