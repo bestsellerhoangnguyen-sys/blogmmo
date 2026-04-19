@@ -7,6 +7,8 @@ import { Breadcrumbs, EmptyState, PageHeader, Surface } from "@/components/ui";
 
 type Post = { id: string; title: string; slug: string; published: boolean; excerpt?: string | null; content: string };
 type Guide = { id: string; title: string; slug: string; published: boolean; summary?: string | null };
+type PostDraft = { title: string; slug: string; excerpt: string; content: string };
+type GuideDraft = { title: string; slug: string; summary: string };
 
 const inputClass = "w-full rounded-xl border border-zinc-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-zinc-400 focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:border-zinc-500 dark:focus:ring-zinc-800";
 const actionBtnClass = "rounded-xl border border-zinc-300 px-3 py-1.5 text-sm transition hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800";
@@ -33,6 +35,10 @@ export default function AdminPage() {
   const [guideSummary, setGuideSummary] = useState("");
   const [guideCategory, setGuideCategory] = useState("general");
   const [error, setError] = useState("");
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
+  const [postDraft, setPostDraft] = useState<PostDraft | null>(null);
+  const [guideDraft, setGuideDraft] = useState<GuideDraft | null>(null);
 
   async function loadData() {
     const [pRes, gRes] = await Promise.all([fetch("/api/posts"), fetch("/api/guides")]);
@@ -135,6 +141,33 @@ export default function AdminPage() {
     await loadData();
   }
 
+  function startEditGuide(guide: Guide) {
+    setEditingGuideId(guide.id);
+    setGuideDraft({ title: guide.title, slug: guide.slug, summary: guide.summary ?? "" });
+  }
+
+  function cancelEditGuide() {
+    setEditingGuideId(null);
+    setGuideDraft(null);
+  }
+
+  async function saveGuide(id: string, published: boolean) {
+    setError("");
+    if (!guideDraft || !guideDraft.title.trim() || !guideDraft.slug.trim()) {
+      setError("Khi sửa guide cần đủ Title và Slug.");
+      return;
+    }
+
+    const token = getCsrfTokenFromCookie();
+    await fetch(`/api/guides/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-csrf-token": token },
+      body: JSON.stringify({ ...guideDraft, published }),
+    });
+    cancelEditGuide();
+    await loadData();
+  }
+
   async function togglePost(id: string, published: boolean) {
     const token = getCsrfTokenFromCookie();
     await fetch(`/api/posts/${id}`, {
@@ -152,6 +185,33 @@ export default function AdminPage() {
       method: "DELETE",
       headers: { "x-csrf-token": token },
     });
+    await loadData();
+  }
+
+  function startEditPost(post: Post) {
+    setEditingPostId(post.id);
+    setPostDraft({ title: post.title, slug: post.slug, excerpt: post.excerpt ?? "", content: post.content });
+  }
+
+  function cancelEditPost() {
+    setEditingPostId(null);
+    setPostDraft(null);
+  }
+
+  async function savePost(id: string, published: boolean) {
+    setError("");
+    if (!postDraft || !postDraft.title.trim() || !postDraft.slug.trim() || !postDraft.content.trim()) {
+      setError("Khi sửa post cần đủ Title, Slug, Content.");
+      return;
+    }
+
+    const token = getCsrfTokenFromCookie();
+    await fetch(`/api/posts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", "x-csrf-token": token },
+      body: JSON.stringify({ ...postDraft, published }),
+    });
+    cancelEditPost();
     await loadData();
   }
 
@@ -200,15 +260,38 @@ export default function AdminPage() {
           <h2 className="text-xl font-semibold">Danh sách posts</h2>
           {posts.length === 0 ? <EmptyState title="Chưa có post" subtitle="Tạo bài viết đầu tiên để bắt đầu." /> : null}
           {posts.map((post) => (
-            <div key={post.id} className="flex flex-col gap-3 rounded-xl border p-3 dark:border-white/20 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-medium">{post.title}</p>
-                <p className="text-sm text-gray-500">/{post.slug}</p>
+            <div key={post.id} className="space-y-3 rounded-xl border p-3 dark:border-white/20">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-medium">{post.title}</p>
+                  <p className="text-sm text-gray-500">/{post.slug}</p>
+                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-xs ${post.published ? "border-green-300 text-green-700 dark:border-green-800 dark:text-green-300" : "border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-300"}`}>
+                  {post.published ? "Published" : "Draft"}
+                </span>
               </div>
+
+              {editingPostId === post.id && postDraft ? (
+                <div className="space-y-2 rounded-xl border border-dashed p-3 dark:border-white/20">
+                  <input className={inputClass} value={postDraft.title} onChange={(e) => setPostDraft((prev) => prev ? { ...prev, title: e.target.value } : prev)} placeholder="Title" />
+                  <input className={inputClass} value={postDraft.slug} onChange={(e) => setPostDraft((prev) => prev ? { ...prev, slug: e.target.value } : prev)} placeholder="Slug" />
+                  <input className={inputClass} value={postDraft.excerpt} onChange={(e) => setPostDraft((prev) => prev ? { ...prev, excerpt: e.target.value } : prev)} placeholder="Excerpt" />
+                  <MdxEditor value={postDraft.content} onChange={(value) => setPostDraft((prev) => prev ? { ...prev, content: value } : prev)} />
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap gap-2">
                 <button className={actionBtnClass} onClick={() => togglePost(post.id, post.published)}>
                   {post.published ? "Unpublish" : "Publish"}
                 </button>
+                {editingPostId === post.id ? (
+                  <>
+                    <button className={primaryBtnClass} onClick={() => savePost(post.id, post.published)}>Save</button>
+                    <button className={actionBtnClass} onClick={cancelEditPost}>Cancel</button>
+                  </>
+                ) : (
+                  <button className={actionBtnClass} onClick={() => startEditPost(post)}>Edit</button>
+                )}
                 <button className={`${actionBtnClass} text-red-600 dark:text-red-400`} onClick={() => deletePost(post.id)}>
                   Delete
                 </button>
@@ -234,15 +317,37 @@ export default function AdminPage() {
           <h2 className="text-xl font-semibold">Danh sách guides</h2>
           {guides.length === 0 ? <EmptyState title="Chưa có guide" subtitle="Tạo guide đầu tiên để bắt đầu." /> : null}
           {guides.map((g) => (
-            <div key={g.id} className="flex flex-col gap-3 rounded-xl border p-3 dark:border-white/20 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-medium">{g.title}</p>
-                <p className="text-sm text-gray-500">/{g.slug}</p>
+            <div key={g.id} className="space-y-3 rounded-xl border p-3 dark:border-white/20">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="font-medium">{g.title}</p>
+                  <p className="text-sm text-gray-500">/{g.slug}</p>
+                </div>
+                <span className={`rounded-full border px-2 py-0.5 text-xs ${g.published ? "border-green-300 text-green-700 dark:border-green-800 dark:text-green-300" : "border-zinc-300 text-zinc-600 dark:border-zinc-700 dark:text-zinc-300"}`}>
+                  {g.published ? "Published" : "Draft"}
+                </span>
               </div>
+
+              {editingGuideId === g.id && guideDraft ? (
+                <div className="space-y-2 rounded-xl border border-dashed p-3 dark:border-white/20">
+                  <input className={inputClass} value={guideDraft.title} onChange={(e) => setGuideDraft((prev) => prev ? { ...prev, title: e.target.value } : prev)} placeholder="Title" />
+                  <input className={inputClass} value={guideDraft.slug} onChange={(e) => setGuideDraft((prev) => prev ? { ...prev, slug: e.target.value } : prev)} placeholder="Slug" />
+                  <input className={inputClass} value={guideDraft.summary} onChange={(e) => setGuideDraft((prev) => prev ? { ...prev, summary: e.target.value } : prev)} placeholder="Summary" />
+                </div>
+              ) : null}
+
               <div className="flex flex-wrap gap-2">
                 <button className={actionBtnClass} onClick={() => toggleGuide(g.id, g.published)}>
                   {g.published ? "Unpublish" : "Publish"}
                 </button>
+                {editingGuideId === g.id ? (
+                  <>
+                    <button className={primaryBtnClass} onClick={() => saveGuide(g.id, g.published)}>Save</button>
+                    <button className={actionBtnClass} onClick={cancelEditGuide}>Cancel</button>
+                  </>
+                ) : (
+                  <button className={actionBtnClass} onClick={() => startEditGuide(g)}>Edit</button>
+                )}
                 <button className={`${actionBtnClass} text-red-600 dark:text-red-400`} onClick={() => deleteGuide(g.id)}>
                   Delete
                 </button>

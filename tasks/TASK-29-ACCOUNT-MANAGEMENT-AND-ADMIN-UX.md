@@ -31,5 +31,6 @@ Implement next-phase product improvements after TASK-28 completion:
 - [x] Account management implementation (new `/account` page + account link in auth controls)
 - [x] Admin UX workflow implementation (client-side validation + destructive confirm)
 - [x] Role boundary tightening for admin APIs (`requireAdmin`)
+- [x] Admin UX batch 2: inline edit workflow for posts/guides + draft/published status badges
 - [~] Regression + deploy (lint/build done; deploy in progress)
 - [ ] Final handover update
