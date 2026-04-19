@@ -1,4 +1,4 @@
-# TASK-29 — Account Management + Admin UX Upgrade (IN PROGRESS)
+# TASK-29 — Account Management + Admin UX Upgrade (COMPLETED)
 
 ## Goal
 Implement next-phase product improvements after TASK-28 completion:
@@ -32,5 +32,5 @@ Implement next-phase product improvements after TASK-28 completion:
 - [x] Admin UX workflow implementation (client-side validation + destructive confirm)
 - [x] Role boundary tightening for admin APIs (`requireAdmin`)
 - [x] Admin UX batch 2: inline edit workflow for posts/guides + draft/published status badges
-- [~] Regression + deploy (lint/build done; deploy in progress)
-- [ ] Final handover update
+- [x] Regression + deploy completed
+- [x] Final handover update (`docs/TASK29_HANDOVER.md`)

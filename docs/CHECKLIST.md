@@ -64,6 +64,6 @@
 - [x] Live e2e smoke pass (3/3)
 
 ## Next Focus
-- Account management module (profile/password/session management + role boundaries).
-- Admin UX upgrade (editing workflow, validation/draft lifecycle, governance).
 - Continue security hardening backlog P1/P2 (`docs/HARDENING_BACKLOG.md`).
+- Add audit log + observability for admin actions.
+- Expand e2e regression for account/admin workflow.
