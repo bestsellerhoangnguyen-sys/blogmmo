@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { requireAuth } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { verifyCsrfToken } from "@/lib/csrf";
 
 export async function GET() {
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
   const posts = await prisma.post.findMany({
     orderBy: { createdAt: "desc" },
     include: { tags: true },
@@ -12,8 +15,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (!verifyCsrfToken(req.headers)) {
     return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
   }

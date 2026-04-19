@@ -32,6 +32,7 @@ export default function AdminPage() {
   const [guideSlug, setGuideSlug] = useState("");
   const [guideSummary, setGuideSummary] = useState("");
   const [guideCategory, setGuideCategory] = useState("general");
+  const [error, setError] = useState("");
 
   async function loadData() {
     const [pRes, gRes] = await Promise.all([fetch("/api/posts"), fetch("/api/guides")]);
@@ -65,6 +66,12 @@ export default function AdminPage() {
   }
 
   async function createPost() {
+    setError("");
+    if (!postTitle.trim() || !postSlug.trim() || !postContent.trim()) {
+      setError("Post cần Title, Slug và Content trước khi tạo.");
+      return;
+    }
+
     const token = getCsrfTokenFromCookie();
     await fetch("/api/posts", {
       method: "POST",
@@ -79,6 +86,12 @@ export default function AdminPage() {
   }
 
   async function createGuide() {
+    setError("");
+    if (!guideTitle.trim() || !guideSlug.trim() || !guideCategory.trim()) {
+      setError("Guide cần Title, Slug, Category trước khi tạo.");
+      return;
+    }
+
     const token = getCsrfTokenFromCookie();
     await fetch("/api/guides", {
       method: "POST",
@@ -113,6 +126,7 @@ export default function AdminPage() {
   }
 
   async function deleteGuide(id: string) {
+    if (!confirm("Xác nhận xóa guide này?")) return;
     const token = getCsrfTokenFromCookie();
     await fetch(`/api/guides/${id}`, {
       method: "DELETE",
@@ -132,6 +146,7 @@ export default function AdminPage() {
   }
 
   async function deletePost(id: string) {
+    if (!confirm("Xác nhận xóa post này?")) return;
     const token = getCsrfTokenFromCookie();
     await fetch(`/api/posts/${id}`, {
       method: "DELETE",
@@ -153,6 +168,7 @@ export default function AdminPage() {
     <main className="space-y-8">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Admin" }]} />
       <PageHeader title="Admin Panel" description="Quản lý nội dung bài viết và guide." />
+      {error ? <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">{error}</p> : null}
 
       <Surface>
         <div className="space-y-3">

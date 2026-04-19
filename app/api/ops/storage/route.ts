@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { checkS3Health } from "@/lib/storage-health";
 
 export async function GET() {
-  const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const health = await checkS3Health();
   return NextResponse.json({

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { verifyCsrfToken } from "@/lib/csrf";
 import { uploadImage } from "@/lib/storage";
 
 export async function POST(req: Request) {
-  const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   if (!verifyCsrfToken(req.headers)) return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
 
   const formData = await req.formData();
