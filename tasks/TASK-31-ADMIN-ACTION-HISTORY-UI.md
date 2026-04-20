@@ -1,4 +1,4 @@
-# TASK-31 — Admin action history UI (IN PROGRESS)
+# TASK-31 — Admin action history UI (COMPLETED)
 
 ## Goal
 Hiển thị lịch sử thao tác admin trực tiếp trong web UI để dễ audit và truy vết thay đổi.
@@ -12,8 +12,8 @@ Hiển thị lịch sử thao tác admin trực tiếp trong web UI để dễ a
 
 ## Status
 - [x] Task created
-- [ ] DB model + migration (deferred: đang dùng log-based baseline trước)
-- [x] API + logging write (audit logs already in place)
+- [x] DB model + migration (`AdminAuditLog` + migration `20260420_add_admin_audit_log`)
+- [x] API + logging write (`/api/admin/audit-logs` + DB-backed `logAdminAudit`)
 - [x] Admin UI account management panel (users list + role update)
 - [x] Account self-service password change (`/api/account/password` + `/account` UI)
-- [~] Verify + deploy + report
+- [x] Verify + deploy + report

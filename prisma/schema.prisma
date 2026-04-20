@@ -18,6 +18,20 @@ model User {
   posts     Post[]
 }
 
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actor      String?
+  action     String
+  resource   String
+  resourceId String?
+  status     String
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([resource, action])
+}
+
 model Post {
   id          String    @id @default(cuid())
   title       String

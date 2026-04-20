@@ -23,6 +23,9 @@
 - Structured admin audit logging via `[ADMIN-AUDIT]` entries
 - Logged actions: create/update/delete posts/guides, upload, storage health checks
 - Logged forbidden attempts for visibility
+- Added persisted DB audit table `AdminAuditLog` + migration
+- Added admin-only API `GET /api/admin/audit-logs`
+- Added admin UI history panel in `/admin` to review latest actions
 
 ### Automated verification
 - Lint/build pass
@@ -35,6 +38,9 @@
 - `5728ba1` inline edit workflow in admin
 - `9d0a32a` structured admin audit logging
 - `4bbee02` registration + DB-backed credentials login
+- `faae667` admin user management panel + self-service password change
+- `10aacd2` registration e2e coverage + admin report
+- `TASK31` batch: AdminAuditLog persistence + action history API/UI
 - (tests) updated e2e security + added registration tests
 
 ## Operational note

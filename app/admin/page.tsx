@@ -8,6 +8,7 @@ import { Breadcrumbs, EmptyState, PageHeader, Surface } from "@/components/ui";
 type Post = { id: string; title: string; slug: string; published: boolean; excerpt?: string | null; content: string };
 type Guide = { id: string; title: string; slug: string; published: boolean; summary?: string | null };
 type AccountUser = { id: string; email: string; name?: string | null; role: string };
+type AuditLog = { id: string; actor?: string | null; action: string; resource: string; resourceId?: string | null; status: string; detail?: string | null; createdAt: string };
 type PostDraft = { title: string; slug: string; excerpt: string; content: string };
 type GuideDraft = { title: string; slug: string; summary: string };
 
@@ -37,17 +38,24 @@ export default function AdminPage() {
   const [guideCategory, setGuideCategory] = useState("general");
   const [error, setError] = useState("");
   const [users, setUsers] = useState<AccountUser[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
   const [postDraft, setPostDraft] = useState<PostDraft | null>(null);
   const [guideDraft, setGuideDraft] = useState<GuideDraft | null>(null);
 
   async function loadData() {
-    const [pRes, gRes, uRes] = await Promise.all([fetch("/api/posts"), fetch("/api/guides"), fetch("/api/admin/users")]);
-    const [pData, gData, uData] = await Promise.all([pRes.json(), gRes.json(), uRes.json()]);
+    const [pRes, gRes, uRes, aRes] = await Promise.all([
+      fetch("/api/posts"),
+      fetch("/api/guides"),
+      fetch("/api/admin/users"),
+      fetch("/api/admin/audit-logs?limit=80"),
+    ]);
+    const [pData, gData, uData, aData] = await Promise.all([pRes.json(), gRes.json(), uRes.json(), aRes.json()]);
     setPosts(Array.isArray(pData) ? pData : []);
     setGuides(Array.isArray(gData) ? gData : []);
     setUsers(Array.isArray(uData) ? uData : []);
+    setAuditLogs(Array.isArray(aData) ? aData : []);
   }
 
   async function updateUserRole(id: string, role: string) {
@@ -388,6 +396,26 @@ export default function AdminPage() {
               </div>
             </div>
           ))}
+        </div>
+      </Surface>
+
+      <Surface>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Lịch sử thao tác admin</h2>
+          {auditLogs.length === 0 ? <EmptyState title="Chưa có log" subtitle="Thao tác admin sẽ xuất hiện tại đây." /> : null}
+          <div className="space-y-2">
+            {auditLogs.map((log) => (
+              <div key={log.id} className="rounded-xl border p-3 text-sm dark:border-white/20">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-medium">{log.action}</span>
+                  <span className="text-zinc-500">{log.resource}</span>
+                  <span className={`rounded-full border px-2 py-0.5 text-xs ${log.status === "success" ? "border-green-300 text-green-700 dark:border-green-800 dark:text-green-300" : "border-red-300 text-red-700 dark:border-red-800 dark:text-red-300"}`}>{log.status}</span>
+                </div>
+                <p className="mt-1 text-xs text-zinc-500">{new Date(log.createdAt).toLocaleString("vi-VN")} • {log.actor || "system"}</p>
+                {log.detail ? <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-300">{log.detail}</p> : null}
+              </div>
+            ))}
+          </div>
         </div>
       </Surface>
     </main>
