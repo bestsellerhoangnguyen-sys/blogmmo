@@ -15,7 +15,7 @@ export default async function Home() {
 
   return (
     <main className="space-y-5 sm:space-y-6">
-      <section className="rounded-2xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-5 text-white sm:p-7">
+      <section className="ui-fade-in rounded-2xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-5 text-white sm:p-7">
         <p className="text-[10px] uppercase tracking-[0.3em] text-orange-400">Design-driven Knowledge Hub</p>
         <h1 className="mt-2 text-3xl font-black leading-tight sm:text-5xl">BlogMMO</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base">
@@ -34,15 +34,15 @@ export default async function Home() {
 
       <Surface>
         <div className="grid gap-3 sm:grid-cols-3 sm:gap-4">
-          <Link className="rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:-translate-y-0.5 hover:border-orange-400/60" href="/blog">
+          <Link className="ui-rise rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:border-orange-400/60" href="/blog">
             <p className="text-base font-semibold sm:text-lg">📚 Blog</p>
             <p className="mt-1 text-sm leading-relaxed text-zinc-400">Danh sách bài viết, phân trang, đọc chi tiết.</p>
           </Link>
-          <Link className="rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:-translate-y-0.5 hover:border-orange-400/60" href="/guides">
+          <Link className="ui-rise rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:border-orange-400/60" href="/guides">
             <p className="text-base font-semibold sm:text-lg">🧭 Guides</p>
             <p className="mt-1 text-sm leading-relaxed text-zinc-400">Hướng dẫn theo bước, filter/search rõ ràng.</p>
           </Link>
-          <Link className="rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:-translate-y-0.5 hover:border-orange-400/60" href="/admin">
+          <Link className="ui-rise rounded-xl border border-orange-500/30 bg-zinc-950 p-4 text-zinc-100 transition hover:border-orange-400/60" href="/admin">
             <p className="text-base font-semibold sm:text-lg">⚙️ Admin</p>
             <p className="mt-1 text-sm leading-relaxed text-zinc-400">Quản trị nội dung bài viết và hướng dẫn.</p>
           </Link>
@@ -57,7 +57,7 @@ export default async function Home() {
           ) : (
             <div className="grid gap-3 sm:grid-cols-3">
               {latestPosts.map((post) => (
-                <Link key={post.id} href={`/blog/${post.slug}`} className="rounded-xl border border-black/10 p-3 transition hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">
+                <Link key={post.id} href={`/blog/${post.slug}`} className="ui-rise rounded-xl border border-black/10 p-3 transition hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">
                   <div className="mb-2 h-24 rounded-lg bg-gradient-to-br from-orange-500/40 to-zinc-900" />
                   <p className="text-sm font-semibold leading-snug">{post.title}</p>
                   <p className="mt-1 text-xs text-zinc-500">{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : "Draft"}</p>

@@ -42,3 +42,28 @@ body {
   background: rgb(24 24 27);
   padding: 0.65rem 0.9rem;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ui-fade-in {
+    animation: uiFadeIn 340ms ease-out both;
+  }
+
+  .ui-rise {
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .ui-rise:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes uiFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

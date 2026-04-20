@@ -37,7 +37,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
     <main className="space-y-5 sm:space-y-6">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Guides" }]} />
 
-      <section className="rounded-2xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-5 text-white sm:p-7">
+      <section className="ui-fade-in rounded-2xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-5 text-white sm:p-7">
         <p className="text-[10px] uppercase tracking-[0.26em] text-orange-400">Practical Playbooks</p>
         <h1 className="mt-2 text-3xl font-black leading-tight sm:text-5xl">Guides</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base">
@@ -82,7 +82,7 @@ export default async function GuidesPage({ searchParams }: GuidesPageProps) {
               <div className="mt-2 flex items-center gap-2">
                 <Pill>{guide.steps.length} steps</Pill>
               </div>
-              <Link href={`/guides/${guide.slug}`} className="mt-3 inline-block rounded-lg border border-orange-500/50 px-3 py-1.5 text-sm font-semibold text-orange-500 transition hover:bg-orange-500/10">
+              <Link href={`/guides/${guide.slug}`} className="ui-rise mt-3 inline-block rounded-lg border border-orange-500/50 px-3 py-1.5 text-sm font-semibold text-orange-500 transition hover:bg-orange-500/10">
                 Xem hướng dẫn
               </Link>
             </Surface>
