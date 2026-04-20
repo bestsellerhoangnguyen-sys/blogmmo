@@ -33,6 +33,11 @@ export function ArticleLayout({
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog", href: "/blog" }, { label: title }]} />
 
       <Surface>
+        <div className="mb-4 rounded-xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 to-black p-4 text-white">
+          <p className="text-[10px] uppercase tracking-[0.24em] text-orange-400">Reader Mode</p>
+          <p className="mt-2 text-lg font-extrabold leading-tight sm:text-2xl">{title}</p>
+        </div>
+
         <header className="space-y-2 border-b pb-4 dark:border-white/20">
           <h1 className="text-2xl font-bold leading-tight sm:text-3xl">{title}</h1>
           <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
@@ -60,7 +65,7 @@ export function ArticleLayout({
 
         {excerpt ? <p className="mt-4 text-base leading-relaxed text-gray-700 dark:text-gray-200 sm:text-lg">{excerpt}</p> : null}
 
-        <section className="prose mt-4 max-w-[68ch] dark:prose-invert">{children}</section>
+        <section className="reader-content prose mt-4 max-w-[68ch] dark:prose-invert">{children}</section>
       </Surface>
     </article>
   );

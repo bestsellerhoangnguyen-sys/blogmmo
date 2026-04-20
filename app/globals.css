@@ -16,3 +16,29 @@ body {
     text-wrap: balance;
   }
 }
+
+.reader-content h2 {
+  border-top: 1px solid rgb(63 63 70);
+  padding-top: 1rem;
+  margin-top: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.reader-content h3 {
+  border-left: 3px solid rgb(249 115 22);
+  padding-left: 0.65rem;
+  font-weight: 700;
+}
+
+.reader-content pre {
+  border: 1px solid rgb(63 63 70);
+  background: rgb(9 9 11);
+  color: rgb(228 228 231);
+}
+
+.reader-content blockquote {
+  border-left: 3px solid rgb(249 115 22);
+  background: rgb(24 24 27);
+  padding: 0.65rem 0.9rem;
+}
