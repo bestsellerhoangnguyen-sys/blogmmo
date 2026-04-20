@@ -39,6 +39,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [users, setUsers] = useState<AccountUser[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
+  const [activeTab, setActiveTab] = useState<"content" | "accounts" | "permissions" | "history">("content");
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
   const [postDraft, setPostDraft] = useState<PostDraft | null>(null);
@@ -252,6 +253,17 @@ export default function AdminPage() {
       {error ? <p className="rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">{error}</p> : null}
 
       <Surface>
+        <div className="flex flex-wrap gap-2">
+          <button className={`rounded-xl border px-3 py-2 text-sm ${activeTab === "content" ? "bg-black text-white dark:bg-white dark:text-black" : "dark:border-white/20"}`} onClick={() => setActiveTab("content")}>Nội dung</button>
+          <button className={`rounded-xl border px-3 py-2 text-sm ${activeTab === "accounts" ? "bg-black text-white dark:bg-white dark:text-black" : "dark:border-white/20"}`} onClick={() => setActiveTab("accounts")}>Tài khoản</button>
+          <button className={`rounded-xl border px-3 py-2 text-sm ${activeTab === "permissions" ? "bg-black text-white dark:bg-white dark:text-black" : "dark:border-white/20"}`} onClick={() => setActiveTab("permissions")}>Quyền quản lý</button>
+          <button className={`rounded-xl border px-3 py-2 text-sm ${activeTab === "history" ? "bg-black text-white dark:bg-white dark:text-black" : "dark:border-white/20"}`} onClick={() => setActiveTab("history")}>Lịch sử thao tác</button>
+        </div>
+      </Surface>
+
+      {activeTab === "content" ? (
+      <>
+      <Surface>
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Tạo post mới</h2>
           <input className={inputClass} placeholder="Title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} />
@@ -377,7 +389,10 @@ export default function AdminPage() {
           ))}
         </div>
       </Surface>
+      </>
+      ) : null}
 
+      {activeTab === "accounts" ? (
       <Surface>
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Quản lý tài khoản</h2>
@@ -398,7 +413,36 @@ export default function AdminPage() {
           ))}
         </div>
       </Surface>
+      ) : null}
 
+      {activeTab === "permissions" ? (
+      <Surface>
+        <div className="space-y-3">
+          <h2 className="text-xl font-semibold">Quyền quản lý của Admin</h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-300">Tab này tóm tắt các quyền hiện tại của admin trong hệ thống.</p>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-sm">
+              <thead>
+                <tr className="border-b dark:border-white/20">
+                  <th className="p-2 text-left font-semibold">Nhóm quyền</th>
+                  <th className="p-2 text-left font-semibold">Mô tả</th>
+                  <th className="p-2 text-left font-semibold">Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b dark:border-white/10"><td className="p-2">Nội dung</td><td className="p-2">Tạo/sửa/xóa/publish Post & Guide</td><td className="p-2">✅ Enabled</td></tr>
+                <tr className="border-b dark:border-white/10"><td className="p-2">Tài khoản</td><td className="p-2">Xem user list, đổi role USER/ADMIN</td><td className="p-2">✅ Enabled</td></tr>
+                <tr className="border-b dark:border-white/10"><td className="p-2">Media/Storage</td><td className="p-2">Upload ảnh, kiểm tra storage health</td><td className="p-2">✅ Enabled</td></tr>
+                <tr className="border-b dark:border-white/10"><td className="p-2">Audit</td><td className="p-2">Xem lịch sử thao tác admin</td><td className="p-2">✅ Enabled</td></tr>
+                <tr><td className="p-2">Bảo mật</td><td className="p-2">CSRF + requireAdmin cho API nhạy cảm</td><td className="p-2">✅ Enabled</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Surface>
+      ) : null}
+
+      {activeTab === "history" ? (
       <Surface>
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Lịch sử thao tác admin</h2>
@@ -418,6 +462,7 @@ export default function AdminPage() {
           </div>
         </div>
       </Surface>
+      ) : null}
     </main>
   );
 }
