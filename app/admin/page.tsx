@@ -40,6 +40,64 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AccountUser[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [activeTab, setActiveTab] = useState<"content" | "accounts" | "permissions" | "history">("content");
+
+  function buildPermissionSnapshot() {
+    return {
+      generatedAt: new Date().toISOString(),
+      summary: {
+        posts: posts.length,
+        guides: guides.length,
+        users: users.length,
+        recentAuditLogs: auditLogs.length,
+      },
+      permissions: [
+        { group: "content", description: "Create/Update/Delete/Publish posts & guides", enabled: true },
+        { group: "accounts", description: "List users and update role USER/ADMIN", enabled: true },
+        { group: "media_storage", description: "Upload media and check storage health", enabled: true },
+        { group: "audit", description: "Read admin action history", enabled: true },
+        { group: "security", description: "CSRF + requireAdmin for sensitive APIs", enabled: true },
+      ],
+    };
+  }
+
+  function exportPermissionsJson() {
+    const data = buildPermissionSnapshot();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-permissions-${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function exportPermissionsMarkdown() {
+    const data = buildPermissionSnapshot();
+    const md = [
+      "# Admin Permission Snapshot",
+      "",
+      `- Generated: ${data.generatedAt}`,
+      `- Posts: ${data.summary.posts}`,
+      `- Guides: ${data.summary.guides}`,
+      `- Users: ${data.summary.users}`,
+      `- Recent audit logs loaded: ${data.summary.recentAuditLogs}`,
+      "",
+      "## Permission Matrix",
+      "",
+      "| Group | Description | Enabled |",
+      "|---|---|---|",
+      ...data.permissions.map((p) => `| ${p.group} | ${p.description} | ${p.enabled ? "Yes" : "No"} |`),
+      "",
+    ].join("\n");
+
+    const blob = new Blob([md], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-permissions-${Date.now()}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [editingGuideId, setEditingGuideId] = useState<string | null>(null);
   const [postDraft, setPostDraft] = useState<PostDraft | null>(null);
@@ -420,6 +478,10 @@ export default function AdminPage() {
         <div className="space-y-3">
           <h2 className="text-xl font-semibold">Quyền quản lý của Admin</h2>
           <p className="text-sm text-zinc-600 dark:text-zinc-300">Tab này tóm tắt các quyền hiện tại của admin trong hệ thống.</p>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={exportPermissionsJson} className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Export JSON</button>
+            <button onClick={exportPermissionsMarkdown} className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Export Markdown</button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-sm">
               <thead>
