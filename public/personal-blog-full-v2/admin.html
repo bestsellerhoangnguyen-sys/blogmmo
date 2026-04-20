@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — Nhật ký Blog</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Admin layout */
+  .admin-sidebar {
+    width: 240px; background: var(--bg-2); border-right: 1px solid var(--border);
+    height: 100vh; overflow-y: auto; flex-shrink: 0;
+    position: sticky; top: 0;
+  }
+  .admin-main { flex: 1; min-width: 0; }
+  .admin-header {
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    padding: .75rem 1.5rem; display: flex; align-items: center;
+    justify-content: space-between; position: sticky; top: 0; z-index: 20;
+    backdrop-filter: blur(10px);
+  }
+  .sidebar-link {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .55rem .85rem; border-radius: 8px;
+    color: var(--fg); text-decoration: none; font-size: .9rem;
+    transition: all .2s; margin: 2px 8px;
+  }
+  .sidebar-link:hover { background: var(--bg); }
+  .sidebar-link.active {
+    background: var(--accent); color: white; font-weight: 500;
+  }
+  .sidebar-link svg { flex-shrink: 0; }
+
+  /* Dashboard cards */
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.2rem;
+  }
+  .stat-number {
+    font-family: 'Merriweather', serif; font-weight: 700;
+    font-size: 2rem; line-height: 1; color: var(--fg);
+  }
+
+  /* Table */
+  .admin-table { width: 100%; border-collapse: collapse; }
+  .admin-table th, .admin-table td {
+    padding: .7rem 1rem; text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: .85rem;
+  }
+  .admin-table th {
+    background: var(--bg-2); font-weight: 500; font-size: .75rem;
+    text-transform: uppercase; color: var(--fg-muted);
+    letter-spacing: .02em; cursor: pointer;
+  }
+  .admin-table tr:hover td { background: var(--bg-2); }
+
+  /* Status badges */
+  .badge {
+    display: inline-flex; align-items: center; padding: .15rem .55rem;
+    border-radius: 999px; font-size: .7rem; font-weight: 500;
+  }
+  .badge-success { background: rgba(5,150,105,.15); color: var(--success); }
+  .badge-warning { background: rgba(245,158,11,.15); color: var(--warning); }
+  .badge-muted   { background: var(--bg-2); color: var(--fg-muted); }
+  .badge-danger  { background: rgba(220,38,38,.15); color: var(--danger); }
+
+  /* Login page */
+  .login-wrap {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; background:
+      radial-gradient(ellipse at top, var(--accent-soft), transparent 60%),
+      radial-gradient(ellipse at bottom, var(--bg-2), var(--bg));
+  }
+  .login-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2.5rem; max-width: 420px; width: 100%;
+    box-shadow: 0 24px 60px rgba(0,0,0,.1);
+  }
+
+  /* Editor */
+  .editor-canvas {
+    min-height: 60vh; font-family: 'Lora', serif;
+    font-size: 1.125rem; line-height: 1.75; color: var(--fg);
+    outline: none; padding: 1rem 0;
+  }
+  .editor-canvas h1 { font-size: 2.25rem; font-weight: 700; margin: 1.5rem 0 1rem; line-height:1.2; font-family:'Merriweather',serif; }
+  .editor-canvas h2 { font-size: 1.6rem; font-weight: 700; margin: 1.4rem 0 .8rem; line-height:1.3; font-family:'Merriweather',serif; }
+  .editor-canvas h3 { font-size: 1.25rem; font-weight: 600; margin: 1.2rem 0 .6rem; font-family:'Merriweather',serif; }
+  .editor-canvas p  { margin: .8rem 0; }
+  .editor-canvas blockquote {
+    border-left: 3px solid var(--accent); padding: .3rem 1rem;
+    color: var(--fg-muted); font-style: italic; margin: 1rem 0;
+    background: var(--accent-soft); border-radius: 0 8px 8px 0;
+  }
+  .editor-canvas ul, .editor-canvas ol { margin: .8rem 0 .8rem 1.5rem; }
+  .editor-canvas ul { list-style: disc; }
+  .editor-canvas ol { list-style: decimal; }
+  .editor-canvas code {
+    background: var(--bg-2); padding: 2px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: .9em;
+  }
+  .editor-canvas pre {
+    background: #1e1e1e; color: #e8e6e0; padding: 1rem; border-radius: 8px;
+    overflow-x: auto; font-family:'JetBrains Mono',monospace; font-size:.9em; margin: 1rem 0;
+  }
+  .editor-canvas a { color: var(--accent); text-decoration: underline; }
+  .editor-canvas img { max-width: 100%; border-radius: 10px; margin: 1rem 0; display: block; }
+  .editor-canvas hr  { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
+  .editor-canvas .callout {
+    background: var(--accent-soft); border-left: 4px solid var(--accent);
+    padding: .8rem 1rem; border-radius: 8px; margin: 1rem 0;
+  }
+  .editor-canvas table {
+    width: 100%; border-collapse: collapse; margin: 1rem 0;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden;
+  }
+  .editor-canvas table th, .editor-canvas table td {
+    padding: .6rem .9rem; border-bottom: 1px solid var(--border); text-align: left;
+  }
+  .editor-canvas table th { background: var(--bg-2); font-family: 'Inter',sans-serif; font-weight:600; font-size:.85rem; }
+  .editor-canvas[data-empty="true"]::before {
+    content: attr(data-placeholder); color: var(--fg-muted); pointer-events: none;
+    position: absolute;
+  }
+  .editor-canvas .embed-youtube, .editor-canvas .embed-vimeo,
+  .editor-canvas .embed-spotify, .editor-canvas .embed-soundcloud {
+    background: var(--bg-2); border: 1px dashed var(--border);
+    border-radius: 8px; padding: 1rem; margin: 1rem 0; text-align: center;
+    color: var(--fg-muted); font-size: .85rem; cursor: pointer;
+  }
+  .editor-canvas .embed-youtube::before { content: '▶ YouTube video'; }
+  .editor-canvas .embed-vimeo::before { content: '▶ Vimeo video'; }
+  .editor-canvas .embed-spotify::before { content: '🎵 Spotify'; }
+  .editor-canvas .embed-soundcloud::before { content: '🎵 SoundCloud'; }
+  .editor-canvas .gallery {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 8px; margin: 1rem 0;
+  }
+  .editor-canvas .gallery-item {
+    aspect-ratio: 4/3; border-radius: 8px; background-size: cover; background-position: center;
+  }
+  .editor-canvas video {
+    width: 100%; border-radius: 8px; margin: 1rem 0;
+  }
+
+  /* Floating toolbar */
+  .floating-toolbar {
+    position: absolute; display: none;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    padding: 4px; z-index: 30;
+  }
+  .floating-toolbar button {
+    width: 32px; height: 32px; border-radius: 6px;
+    color: var(--fg); background: transparent; border: 0; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .floating-toolbar button:hover { background: var(--bg-2); }
+
+  /* Slash menu */
+  .slash-menu {
+    position: absolute; display: none;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.15);
+    width: 300px; z-index: 30; overflow: hidden; max-height: 360px; overflow-y: auto;
+  }
+  .slash-item { padding: .55rem .8rem; cursor: pointer; display:flex; gap:.7rem; align-items:center; }
+  .slash-item:hover, .slash-item.active { background: var(--bg-2); }
+  .slash-icon {
+    width: 30px; height:30px; border-radius:6px; background: var(--bg);
+    display:flex; align-items:center; justify-content:center; font-size: .85rem;
+    border: 1px solid var(--border);
+  }
+
+  /* Media grid */
+  .media-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+  .media-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; cursor: pointer;
+    transition: transform .15s, border-color .15s;
+  }
+  .media-item:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .media-item.selected { border-color: var(--accent); border-width: 2px; }
+  .media-thumb {
+    aspect-ratio: 4/3; background-size: cover; background-position: center;
+    background: var(--bg-2); display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
+    padding: .75rem 1rem; background: var(--bg-2);
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .admin-sidebar { display: none; }
+    .admin-sidebar.open {
+      display: block; position: fixed; top: 0; left: 0; z-index: 40;
+    }
+  }
+
+  /* Placeholder */
+  .editor-canvas { position: relative; }
+
+  /* Stat trend */
+  .trend-up { color: var(--success); }
+  .trend-down { color: var(--danger); }
+
+  /* Panel section */
+  .settings-section {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<!-- =============== LOGIN VIEW =============== -->
+<div id="loginView" style="display:none;">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl mx-auto flex items-center justify-center text-white text-2xl font-bold mb-3" style="background: var(--accent);">N</div>
+        <h1 class="font-merri font-bold text-2xl">Admin Đăng nhập</h1>
+        <p class="text-sm mt-1" style="color: var(--fg-muted);">Quản lý blog của bạn</p>
+      </div>
+      <div class="space-y-3">
+        <div class="rounded-lg border p-3 text-sm" style="border-color: var(--border); color: var(--fg-muted);">
+          Khu vực này yêu cầu tài khoản <b>ADMIN</b> của hệ thống.
+        </div>
+        <a href="/login" class="btn btn-primary w-full justify-center py-3" style="text-decoration:none;">Đăng nhập hệ thống</a>
+        <button onclick="checkAdminSession(true)" class="btn btn-outline w-full justify-center py-3">Tôi đã đăng nhập, kiểm tra lại</button>
+      </div>
+      <div class="text-center text-xs mt-6" style="color: var(--fg-muted);">
+        <div class="mb-2">Không còn dùng demo login localStorage.</div>
+        <a href="index.html" style="color: var(--accent);">← Quay lại blog công khai</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== ADMIN APP =============== -->
+<div id="adminApp" style="display:none;" class="flex">
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="admin-sidebar">
+    <div class="p-4 border-b" style="border-color: var(--border);">
+      <a href="#/dashboard" class="flex items-center gap-2" style="text-decoration:none;color:inherit;">
+        <div class="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold" style="background: var(--accent);">N</div>
+        <div>
+          <div class="font-merri font-bold leading-none" id="adminSiteTitle">Nhật ký</div>
+          <div class="text-xs" style="color: var(--fg-muted);">Admin Panel</div>
+        </div>
+      </a>
+    </div>
+
+    <nav class="py-2">
+      <a href="#/dashboard" class="sidebar-link" data-nav="dashboard">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a>
+      <a href="#/posts" class="sidebar-link" data-nav="posts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Bài viết
+      </a>
+      <a href="#/editor/new" class="sidebar-link" data-nav="editor">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Viết bài mới
+      </a>
+      <a href="#/media" class="sidebar-link" data-nav="media">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Thư viện media
+      </a>
+      <a href="#/comments" class="sidebar-link" data-nav="comments">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        Bình luận <span id="pendingBadge" class="badge badge-warning ml-auto"></span>
+      </a>
+      <a href="#/categories" class="sidebar-link" data-nav="categories">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Chuyên mục
+      </a>
+      <a href="#/subscribers" class="sidebar-link" data-nav="subscribers">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Người đăng ký
+      </a>
+      <a href="#/settings" class="sidebar-link" data-nav="settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Cài đặt
+      </a>
+    </nav>
+
+    <div class="mt-auto p-4 border-t" style="border-color: var(--border);">
+      <a href="index.html" target="_blank" class="sidebar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Xem blog công khai
+      </a>
+      <a href="#" onclick="doLogout();return false;" class="sidebar-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Đăng xuất
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="admin-main">
+    <header class="admin-header">
+      <div class="flex items-center gap-3">
+        <button class="btn btn-icon btn-ghost md:hidden" onclick="$('#sidebar').classList.toggle('open')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <h1 id="pageTitle" class="font-merri font-bold text-xl">Dashboard</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="themeBtnAdmin" class="btn btn-icon btn-ghost" title="Đổi giao diện">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background: var(--bg-2);">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background: var(--accent);">A</div>
+          <span class="text-sm font-medium hide-mobile">Anh Hoàng</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="p-6">
+
+      <!-- ============ DASHBOARD VIEW ============ -->
+      <div id="dashboardView" class="view-admin">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
+          <div class="stat-card">
+            <div class="text-xs mb-2" style="color: var(--fg-muted);">TỔNG BÀI VIẾT</div>
+            <div class="stat-number" id="statPosts">0</div>
+            <div class="text-xs mt-1 trend-up">↑ 3 trong tháng</div>
+          </div>
+          <div class="stat-card">
+            <div class="text-xs mb-2" style="color: var(--fg-muted);">LƯỢT XEM</div>
+            <div class="stat-number" id="statViews">0</div>
+            <div class="text-xs mt-1 trend-up">↑ 12.4%</div>
+          </div>
+          <div class="stat-card">
+            <div class="text-xs mb-2" style="color: var(--fg-muted);">BÌNH LUẬN</div>
+            <div class="stat-number" id="statComments">0</div>
+            <div class="text-xs mt-1" style="color: var(--fg-muted);" id="statPending">0 chờ duyệt</div>
+          </div>
+          <div class="stat-card">
+            <div class="text-xs mb-2" style="color: var(--fg-muted);">ĐĂNG KÝ</div>
+            <div class="stat-number" id="statSubs">0</div>
+            <div class="text-xs mt-1 trend-up">↑ 5 tuần này</div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="md:col-span-2 card">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-merri font-bold text-lg">Bài viết gần đây</h2>
+              <a href="#/posts" class="text-xs" style="color: var(--accent);">Xem tất cả →</a>
+            </div>
+            <div id="recentPosts"></div>
+          </div>
+
+          <div class="card">
+            <h2 class="font-merri font-bold text-lg mb-4">Hoạt động gần đây</h2>
+            <div id="recentActivity" class="space-y-3 text-sm"></div>
+          </div>
+        </div>
+
+        <div class="card mt-4">
+          <h2 class="font-merri font-bold text-lg mb-4">Bài viết xem nhiều nhất</h2>
+          <div id="topPosts"></div>
+        </div>
+
+        <div class="card mt-4">
+          <h2 class="font-merri font-bold text-lg mb-4">Thao tác nhanh</h2>
+          <div class="flex flex-wrap gap-2">
+            <a href="#/editor/new" class="btn btn-primary">✍️ Viết bài mới</a>
+            <a href="#/media" class="btn btn-outline">📷 Upload media</a>
+            <a href="#/comments" class="btn btn-outline">💬 Duyệt bình luận</a>
+            <a href="#/settings" class="btn btn-outline">⚙️ Cài đặt</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ POSTS VIEW ============ -->
+      <div id="postsView" class="view-admin" style="display:none;">
+        <div class="filter-bar">
+          <input id="postSearch" class="input flex-1" style="max-width: 300px;" placeholder="🔍 Tìm bài viết..." />
+          <select id="postStatusFilter" class="select" style="max-width: 160px;">
+            <option value="all">Tất cả trạng thái</option>
+            <option value="published">Đã đăng</option>
+            <option value="draft">Nháp</option>
+            <option value="archived">Lưu trữ</option>
+          </select>
+          <select id="postCatFilter" class="select" style="max-width: 180px;">
+            <option value="all">Tất cả chuyên mục</option>
+          </select>
+          <div class="ml-auto flex gap-2">
+            <a href="#/editor/new" class="btn btn-primary">+ Bài mới</a>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Tiêu đề</th>
+                <th>Chuyên mục</th>
+                <th>Trạng thái</th>
+                <th>Ngày</th>
+                <th>Lượt xem</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="postsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ EDITOR VIEW ============ -->
+      <div id="editorView" class="view-admin" style="display:none;">
+        <div class="grid md:grid-cols-[1fr_320px] gap-6">
+          <div>
+            <div class="mb-4">
+              <input id="editorTitle" placeholder="Tiêu đề bài viết..." class="w-full font-merri font-bold text-3xl md:text-4xl leading-tight bg-transparent outline-none" style="color: var(--fg); border:0;" />
+            </div>
+
+            <div id="editorCoverBox" class="mb-4 rounded-xl h-40 flex items-center justify-center cursor-pointer text-sm border-dashed" style="background: var(--bg-2); border: 2px dashed var(--border); color: var(--fg-muted);">
+              <div class="text-center">
+                <div class="text-2xl mb-1">🌄</div>
+                <div>Chọn ảnh bìa</div>
+              </div>
+            </div>
+
+            <div class="mb-3 flex items-center gap-2 text-xs" style="color: var(--fg-muted);">
+              <span>Gõ <kbd class="px-1.5 py-0.5 rounded" style="background:var(--bg-2);">/</kbd> để chèn block</span>
+              <span>•</span>
+              <span id="editorWordCount">0 từ</span>
+              <span>•</span>
+              <span id="editorReadTime">0 phút đọc</span>
+              <span class="ml-auto" id="editorSaveStatus">Đã lưu</span>
+            </div>
+
+            <div id="editorCanvas" class="editor-canvas font-serif" contenteditable="true" data-placeholder="Bắt đầu viết, hoặc gõ / để chèn block..." data-empty="true"></div>
+
+            <!-- Floating toolbar -->
+            <div id="floatingToolbar" class="floating-toolbar">
+              <button data-cmd="bold" title="Đậm (Ctrl+B)"><b>B</b></button>
+              <button data-cmd="italic" title="Nghiêng"><i>I</i></button>
+              <button data-cmd="underline" title="Gạch chân"><u>U</u></button>
+              <button data-cmd="strikeThrough" title="Gạch ngang"><s>S</s></button>
+              <button data-cmd="h1" title="Heading 1">H1</button>
+              <button data-cmd="h2" title="Heading 2">H2</button>
+              <button data-cmd="h3" title="Heading 3">H3</button>
+              <button data-cmd="quote" title="Trích dẫn">❝</button>
+              <button data-cmd="code" title="Code inline">&lt;/&gt;</button>
+              <button data-cmd="link" title="Liên kết">🔗</button>
+            </div>
+
+            <div id="slashMenu" class="slash-menu"></div>
+          </div>
+
+          <!-- Right sidebar -->
+          <aside class="space-y-4">
+            <div class="flex gap-2">
+              <button onclick="previewPost()" class="btn btn-outline flex-1 justify-center">Xem trước</button>
+              <button onclick="savePost()" class="btn btn-ghost" title="Lưu nháp"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></button>
+              <button onclick="publishPost()" class="btn btn-primary flex-1 justify-center">Xuất bản</button>
+            </div>
+
+            <div class="card">
+              <label class="label">Trạng thái</label>
+              <select id="editorStatus" class="select mb-3">
+                <option value="draft">Nháp</option>
+                <option value="published">Đã đăng</option>
+                <option value="archived">Lưu trữ</option>
+              </select>
+
+              <label class="label">Slug URL</label>
+              <input id="editorSlug" class="input font-mono mb-3" style="font-size:.8rem;" />
+
+              <label class="label">Chuyên mục</label>
+              <select id="editorCategory" class="select mb-3"></select>
+
+              <label class="label">Tag (cách nhau bằng dấu phẩy)</label>
+              <input id="editorTags" class="input mb-3" placeholder="du lịch, đời sống" />
+
+              <label class="label">Ngày đăng</label>
+              <input id="editorDate" type="date" class="select mb-3" />
+
+              <label class="label flex items-center gap-2 normal-case tracking-normal">
+                <input type="checkbox" id="editorFeatured" /> <span>Bài nổi bật</span>
+              </label>
+              <label class="label flex items-center gap-2 normal-case tracking-normal mt-2">
+                <input type="checkbox" id="editorDropCap" /> <span>Drop cap (chữ đầu to)</span>
+              </label>
+            </div>
+
+            <div class="card">
+              <label class="label">Cảm xúc bài viết</label>
+              <div id="editorMoodPicker" class="flex flex-wrap gap-1 mb-3"></div>
+
+              <label class="label">Chữ ký cuối bài</label>
+              <input id="editorSignature" class="input text-xs" placeholder="Viết tại Đà Lạt..." />
+            </div>
+
+            <div class="card">
+              <label class="label">SEO</label>
+              <input id="editorSeoTitle" class="input text-sm mb-2" placeholder="SEO Title" />
+              <textarea id="editorSeoDesc" rows="3" class="textarea text-sm" placeholder="Meta description..."></textarea>
+            </div>
+
+            <button onclick="deletePost()" id="deletePostBtn" class="btn btn-outline w-full justify-center" style="color: var(--danger);">🗑 Xoá bài viết</button>
+          </aside>
+        </div>
+      </div>
+
+      <!-- ============ MEDIA VIEW ============ -->
+      <div id="mediaView" class="view-admin" style="display:none;">
+        <div class="filter-bar">
+          <input id="mediaSearch" class="input flex-1" style="max-width:300px;" placeholder="🔍 Tìm file..." />
+          <select id="mediaTypeFilter" class="select" style="max-width:160px;">
+            <option value="all">Tất cả</option>
+            <option value="image">Hình ảnh</option>
+            <option value="video">Video</option>
+            <option value="audio">Âm thanh</option>
+          </select>
+          <div class="ml-auto">
+            <button onclick="uploadMedia()" class="btn btn-primary">↑ Upload file</button>
+          </div>
+        </div>
+        <input id="mediaUploadInput" type="file" accept="image/*,video/*,audio/*" multiple style="display:none;" />
+        <div id="mediaGrid" class="media-grid"></div>
+      </div>
+
+      <!-- ============ COMMENTS VIEW ============ -->
+      <div id="commentsView" class="view-admin" style="display:none;">
+        <div class="filter-bar">
+          <select id="commentFilter" class="select" style="max-width:200px;">
+            <option value="all">Tất cả</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="approved">Đã duyệt</option>
+          </select>
+          <div class="ml-auto text-sm" style="color: var(--fg-muted);">
+            <span id="commentsStats"></span>
+          </div>
+        </div>
+        <div id="commentsTable" class="space-y-2"></div>
+      </div>
+
+      <!-- ============ CATEGORIES VIEW ============ -->
+      <div id="categoriesView" class="view-admin" style="display:none;">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-merri font-bold text-lg">Chuyên mục</h2>
+          <button onclick="addCategory()" class="btn btn-primary">+ Thêm chuyên mục</button>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="admin-table">
+            <thead>
+              <tr><th>Tên</th><th>Slug</th><th>Màu</th><th>Số bài</th><th></th></tr>
+            </thead>
+            <tbody id="categoriesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ SUBSCRIBERS VIEW ============ -->
+      <div id="subscribersView" class="view-admin" style="display:none;">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="font-merri font-bold text-lg">Người đăng ký nhận bài</h2>
+            <div class="text-sm" style="color: var(--fg-muted);"><span id="subCount">0</span> email</div>
+          </div>
+          <button onclick="exportSubs()" class="btn btn-outline">↓ Xuất CSV</button>
+        </div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="admin-table">
+            <thead><tr><th>Email</th><th>Ngày đăng ký</th><th></th></tr></thead>
+            <tbody id="subsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ============ SETTINGS VIEW ============ -->
+      <div id="settingsView" class="view-admin" style="display:none;">
+        <div class="max-w-3xl">
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4">Thông tin blog</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div>
+                <label class="label">Tên blog</label>
+                <input id="setSiteTitle" class="input" />
+              </div>
+              <div>
+                <label class="label">Slogan</label>
+                <input id="setSiteTagline" class="input" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="label">Mô tả</label>
+                <textarea id="setSiteDesc" rows="2" class="textarea"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4">Tác giả</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div>
+                <label class="label">Tên tác giả</label>
+                <input id="setAuthorName" class="input" />
+              </div>
+              <div>
+                <label class="label">Email liên hệ</label>
+                <input id="setAuthorEmail" type="email" class="input" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="label">Giới thiệu ngắn</label>
+                <textarea id="setAuthorBio" rows="2" class="textarea"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4">Giao diện</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div>
+                <label class="label">Màu chủ đạo (accent)</label>
+                <input id="setAccent" type="color" class="input h-10" />
+              </div>
+              <div>
+                <label class="label">Theme mặc định</label>
+                <select id="setDefaultTheme" class="select">
+                  <option value="light">Sáng</option>
+                  <option value="dark">Tối</option>
+                  <option value="sepia">Sepia</option>
+                </select>
+              </div>
+            </div>
+            <div class="mt-3 space-y-2">
+              <label class="flex items-center gap-2 text-sm"><input id="setShowReactions" type="checkbox" /> Hiện nút cảm xúc</label>
+              <label class="flex items-center gap-2 text-sm"><input id="setShowComments" type="checkbox" /> Cho phép bình luận</label>
+              <label class="flex items-center gap-2 text-sm"><input id="setCookieConsent" type="checkbox" /> Hiện cookie banner</label>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4">Mạng xã hội</h3>
+            <div class="grid md:grid-cols-2 gap-3">
+              <div><label class="label">Facebook</label><input id="setFB" class="input" placeholder="https://facebook.com/..." /></div>
+              <div><label class="label">Twitter/X</label><input id="setTW" class="input" placeholder="https://x.com/..." /></div>
+              <div><label class="label">Instagram</label><input id="setIG" class="input" placeholder="https://instagram.com/..." /></div>
+              <div><label class="label">GitHub</label><input id="setGH" class="input" placeholder="https://github.com/..." /></div>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4">SEO mặc định</h3>
+            <div>
+              <label class="label">Default SEO Title</label>
+              <input id="setSeoTitle" class="input mb-3" />
+              <label class="label">Default Meta Description</label>
+              <textarea id="setSeoDesc" rows="2" class="textarea"></textarea>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h3 class="font-merri font-bold text-lg mb-4" style="color: var(--danger);">Nguy hiểm</h3>
+            <div class="space-y-2">
+              <button onclick="exportData()" class="btn btn-outline w-full justify-start">📦 Xuất toàn bộ dữ liệu (JSON)</button>
+              <button onclick="resetData()" class="btn btn-outline w-full justify-start" style="color: var(--danger);">⚠️ Reset về dữ liệu demo</button>
+            </div>
+          </div>
+
+          <div class="flex gap-2 mt-4 pb-8">
+            <button onclick="saveSettings()" class="btn btn-primary flex-1 justify-center py-3">Lưu cài đặt</button>
+            <button onclick="renderSettings()" class="btn btn-outline">Hủy</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast">Đã lưu</div>
+
+<!-- Media picker modal -->
+<div id="mediaPickerModal" class="modal-bg">
+  <div class="modal" style="max-width: 720px;">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-merri font-bold text-lg">Chọn từ thư viện</h3>
+      <button onclick="closeMediaPicker()" class="btn btn-icon btn-ghost">✕</button>
+    </div>
+    <div class="flex gap-2 mb-4">
+      <button onclick="document.getElementById('pickerUploadInput').click()" class="btn btn-outline">↑ Upload mới</button>
+      <input id="pickerUploadInput" type="file" accept="image/*,video/*" style="display:none;" />
+    </div>
+    <div id="mediaPickerGrid" class="media-grid"></div>
+  </div>
+</div>
+
+<!-- Confirm modal -->
+<div id="confirmModal" class="modal-bg">
+  <div class="modal" style="max-width: 420px;">
+    <h3 class="font-merri font-bold text-lg mb-2" id="confirmTitle">Xác nhận</h3>
+    <p id="confirmMessage" class="mb-4 text-sm" style="color: var(--fg-muted);"></p>
+    <div class="flex gap-2 justify-end">
+      <button onclick="closeConfirm()" class="btn btn-outline">Hủy</button>
+      <button onclick="confirmYes()" class="btn btn-danger" id="confirmYesBtn">Đồng ý</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+/* =================== AUTH =================== */
+let isLoggedIn = false;
+
+async function checkAdminSession(showToastMsg = false) {
+  try {
+    const res = await fetch('/api/admin/users', { credentials: 'include' });
+    isLoggedIn = res.ok;
+    if (isLoggedIn) {
+      showApp();
+      if (showToastMsg) toast('Xác thực admin thành công');
+    } else {
+      showLogin();
+      if (showToastMsg) toast('Bạn chưa có quyền admin hoặc chưa đăng nhập');
+    }
+  } catch {
+    isLoggedIn = false;
+    showLogin();
+    if (showToastMsg) toast('Không thể kiểm tra phiên đăng nhập');
+  }
+}
+
+function doLogout() {
+  if (!confirm('Đăng xuất phiên hệ thống?')) return;
+  location.href = '/login';
+}
+
+function showApp() {
+  $('#loginView').style.display = 'none';
+  $('#adminApp').style.display = 'flex';
+  route();
+}
+
+function showLogin() {
+  $('#loginView').style.display = 'block';
+  $('#adminApp').style.display = 'none';
+}
+
+/* =================== STATE =================== */
+let state = {
+  view: 'dashboard',
+  editingPostId: null,
+  theme: localStorage.getItem('theme') || 'light',
+  confirmCb: null,
+  pickerCb: null,
+};
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+function toast(msg) { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
+
+function applyTheme() { document.documentElement.className = state.theme==='light'?'':state.theme; }
+applyTheme();
+
+$('#themeBtnAdmin').addEventListener('click', () => {
+  const T = ['light','dark','sepia'];
+  state.theme = T[(T.indexOf(state.theme)+1)%T.length];
+  localStorage.setItem('theme', state.theme);
+  applyTheme();
+});
+
+/* =================== ROUTING =================== */
+function parseHash() {
+  const h = location.hash.slice(1) || '/dashboard';
+  const parts = h.split('/').filter(Boolean);
+  if (!parts.length || parts[0] === 'dashboard') return { view: 'dashboard' };
+  if (parts[0] === 'posts') return { view: 'posts' };
+  if (parts[0] === 'editor') return { view: 'editor', id: parts[1] || 'new' };
+  if (parts[0] === 'media') return { view: 'media' };
+  if (parts[0] === 'comments') return { view: 'comments' };
+  if (parts[0] === 'categories') return { view: 'categories' };
+  if (parts[0] === 'subscribers') return { view: 'subscribers' };
+  if (parts[0] === 'settings') return { view: 'settings' };
+  return { view: 'dashboard' };
+}
+
+function route() {
+  if (!isLoggedIn) { showLogin(); return; }
+  const r = parseHash();
+  state.view = r.view;
+  $$('.view-admin').forEach(v => v.style.display = 'none');
+  const el = $('#' + r.view + 'View');
+  if (el) el.style.display = 'block';
+  const titles = {
+    dashboard: 'Dashboard', posts: 'Bài viết', editor: state.editingPostId ? 'Chỉnh sửa bài' : 'Viết bài mới',
+    media: 'Thư viện media', comments: 'Bình luận', categories: 'Chuyên mục',
+    subscribers: 'Người đăng ký', settings: 'Cài đặt'
+  };
+  $('#pageTitle').textContent = titles[r.view];
+  $$('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === r.view));
+  if (r.view === 'dashboard') renderDashboard();
+  else if (r.view === 'posts') renderPostsList();
+  else if (r.view === 'editor') openEditor(r.id);
+  else if (r.view === 'media') renderMedia();
+  else if (r.view === 'comments') renderComments();
+  else if (r.view === 'categories') renderCategoriesAdmin();
+  else if (r.view === 'subscribers') renderSubscribers();
+  else if (r.view === 'settings') renderSettings();
+  window.scrollTo({top:0});
+  updateBadges();
+}
+window.addEventListener('hashchange', route);
+
+function updateBadges() {
+  const data = loadData();
+  const pending = (data.comments||[]).filter(c => !c.approved).length;
+  const badge = $('#pendingBadge');
+  if (pending > 0) { badge.textContent = pending; badge.style.display='inline-flex'; }
+  else { badge.style.display='none'; }
+}
+
+/* =================== DASHBOARD =================== */
+function renderDashboard() {
+  const data = loadData();
+  const posts = data.posts;
+  const published = posts.filter(p => p.status === 'published');
+  $('#statPosts').textContent = posts.length;
+  $('#statViews').textContent = published.reduce((s,p)=>s+(p.views||0),0).toLocaleString('vi-VN');
+  $('#statComments').textContent = (data.comments||[]).filter(c => c.approved).length;
+  const pending = (data.comments||[]).filter(c => !c.approved).length;
+  $('#statPending').textContent = pending + ' chờ duyệt';
+  $('#statSubs').textContent = (data.subscribers||[]).length;
+
+  $('#recentPosts').innerHTML = posts.slice(0,5).map(p => `
+    <a href="#/editor/${p.id}" class="flex items-center justify-between py-2.5 border-b last:border-0" style="border-color:var(--border); text-decoration:none; color:inherit;">
+      <div class="flex items-center gap-3 min-w-0">
+        <span class="text-lg">${p.mood||'📝'}</span>
+        <div class="min-w-0">
+          <div class="font-medium text-sm truncate">${p.title||'(Không tiêu đề)'}</div>
+          <div class="text-xs" style="color: var(--fg-muted);">${fmtDateShort(p.date)} • ${p.views||0} views</div>
+        </div>
+      </div>
+      <span class="badge ${p.status==='published'?'badge-success':p.status==='draft'?'badge-muted':'badge-warning'}">${p.status==='published'?'Đăng':p.status==='draft'?'Nháp':'Lưu trữ'}</span>
+    </a>
+  `).join('');
+
+  const top = [...published].sort((a,b)=>(b.views||0)-(a.views||0)).slice(0,5);
+  $('#topPosts').innerHTML = top.map((p,i) => `
+    <div class="flex items-center gap-3 py-2 border-b last:border-0" style="border-color:var(--border);">
+      <div class="font-merri font-bold text-xl" style="color:var(--fg-muted); width:24px;">${i+1}</div>
+      <span class="text-lg">${p.mood}</span>
+      <div class="flex-1 min-w-0">
+        <div class="font-medium text-sm truncate">${p.title}</div>
+      </div>
+      <div class="text-sm font-mono" style="color: var(--accent);">${(p.views||0).toLocaleString()} 👁</div>
+    </div>
+  `).join('');
+
+  const activities = [
+    { icon: '💬', text: 'Bình luận mới từ <b>Anh Thư</b> trên "Chiều mưa Đà Lạt"', time: '2 giờ trước' },
+    { icon: '📬', text: 'Thêm 1 người đăng ký newsletter', time: '5 giờ trước' },
+    { icon: '👁', text: 'Bài "Một năm học code" đạt <b>2,000 lượt xem</b>', time: '1 ngày trước' },
+    { icon: '✨', text: 'Bài "Playlist cho đêm không ngủ" được đăng', time: '2 ngày trước' },
+    { icon: '🔥', text: 'Streak viết 7 ngày liên tục', time: '3 ngày trước' },
+  ];
+  $('#recentActivity').innerHTML = activities.map(a => `
+    <div class="flex gap-3">
+      <div class="text-lg">${a.icon}</div>
+      <div class="flex-1 min-w-0">
+        <div>${a.text}</div>
+        <div class="text-xs" style="color: var(--fg-muted);">${a.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* =================== POSTS LIST =================== */
+function renderPostsList() {
+  const data = loadData();
+  const catSel = $('#postCatFilter');
+  catSel.innerHTML = '<option value="all">Tất cả chuyên mục</option>' + data.categories.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+  function doRender() {
+    const q = $('#postSearch').value.toLowerCase();
+    const status = $('#postStatusFilter').value;
+    const cat = $('#postCatFilter').value;
+    let ps = data.posts;
+    if (status !== 'all') ps = ps.filter(p => p.status === status);
+    if (cat !== 'all') ps = ps.filter(p => p.categoryId === cat);
+    if (q) ps = ps.filter(p => p.title.toLowerCase().includes(q) || (p.content||'').toLowerCase().includes(q));
+
+    $('#postsTableBody').innerHTML = ps.map(p => {
+      const catObj = data.categories.find(c => c.id === p.categoryId);
+      return `<tr>
+        <td>
+          <div class="flex items-center gap-2">
+            <span>${p.mood||''}</span>
+            <div class="min-w-0">
+              <div class="font-medium truncate">${p.title||'(Không tiêu đề)'}</div>
+              <div class="text-xs" style="color: var(--fg-muted);">/${p.slug}</div>
+            </div>
+          </div>
+        </td>
+        <td>${catObj?`<span class="chip" style="color:${catObj.color};">${catObj.name}</span>`:'—'}</td>
+        <td><span class="badge ${p.status==='published'?'badge-success':p.status==='draft'?'badge-muted':'badge-warning'}">${p.status==='published'?'Đã đăng':p.status==='draft'?'Nháp':'Lưu trữ'}</span></td>
+        <td class="text-xs" style="color: var(--fg-muted);">${fmtDateShort(p.date)}</td>
+        <td>${(p.views||0).toLocaleString('vi-VN')}</td>
+        <td class="text-right">
+          <a href="#/editor/${p.id}" class="btn btn-outline" style="padding:.3rem .6rem; font-size:.75rem;">Sửa</a>
+          <a href="index.html#/post/${p.slug}" target="_blank" class="btn btn-ghost" style="padding:.3rem .6rem; font-size:.75rem;">Xem</a>
+          <button onclick="confirmDelete('${p.id}')" class="btn btn-ghost" style="padding:.3rem .6rem; font-size:.75rem; color: var(--danger);">Xoá</button>
+        </td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="6" class="text-center py-8" style="color: var(--fg-muted);">Không có bài nào</td></tr>`;
+  }
+  doRender();
+  $('#postSearch').oninput = doRender;
+  $('#postStatusFilter').onchange = doRender;
+  $('#postCatFilter').onchange = doRender;
+}
+
+function confirmDelete(id) {
+  showConfirm('Xoá bài viết?', 'Bài viết sẽ bị xoá vĩnh viễn, không thể khôi phục.', () => {
+    const data = loadData();
+    data.posts = data.posts.filter(p => p.id !== id);
+    saveData(data);
+    renderPostsList();
+    toast('Đã xoá bài viết');
+  });
+}
+
+/* =================== EDITOR =================== */
+function openEditor(id) {
+  const data = loadData();
+  let post;
+  if (id === 'new') {
+    post = {
+      id: 'p' + Date.now(), title: '', slug: '', status: 'draft',
+      mood: '', tags: [], categoryId: data.categories[0]?.id,
+      date: new Date().toISOString().slice(0,10), cover: 'linear-gradient(135deg, #c9a876, #7a5c3a)',
+      coverImage: '', signature: '', dropCap: false, featured: false,
+      views: 0, content: '', excerpt: '', readTime: 1,
+    };
+    state.editingPostId = post.id;
+    data.posts.unshift(post);
+    saveData(data);
+    location.hash = '#/editor/' + post.id;
+    return;
+  } else {
+    post = data.posts.find(p => p.id === id);
+    if (!post) { location.hash='#/posts'; return; }
+    state.editingPostId = id;
+  }
+
+  $('#editorTitle').value = post.title || '';
+  $('#editorSlug').value = post.slug || '';
+  $('#editorStatus').value = post.status;
+  $('#editorDate').value = post.date;
+  $('#editorTags').value = (post.tags||[]).join(', ');
+  $('#editorFeatured').checked = !!post.featured;
+  $('#editorDropCap').checked = !!post.dropCap;
+  $('#editorSignature').value = post.signature || '';
+  $('#editorSeoTitle').value = post.seoTitle || post.title || '';
+  $('#editorSeoDesc').value = post.seoDesc || post.excerpt || '';
+  $('#editorCanvas').innerHTML = post.content || '';
+  $('#editorCanvas').dataset.empty = post.content ? 'false' : 'true';
+
+  // Categories
+  $('#editorCategory').innerHTML = data.categories.map(c =>
+    `<option value="${c.id}" ${c.id===post.categoryId?'selected':''}>${c.name}</option>`
+  ).join('');
+
+  // Mood picker
+  $('#editorMoodPicker').innerHTML = MOODS_LIST.map(m => `
+    <span class="chip ${post.mood===m.e?'active':''}" data-mood="${m.e}">${m.e} ${m.n}</span>
+  `).join('');
+  $$('#editorMoodPicker [data-mood]').forEach(el => {
+    el.onclick = () => {
+      const data = loadData();
+      const p = data.posts.find(x => x.id === state.editingPostId);
+      p.mood = p.mood === el.dataset.mood ? '' : el.dataset.mood;
+      saveData(data);
+      openEditor(state.editingPostId);
+    };
+  });
+
+  // Cover
+  const coverBox = $('#editorCoverBox');
+  if (post.coverImage) {
+    coverBox.style.backgroundImage = `url(${post.coverImage})`;
+    coverBox.style.backgroundSize = 'cover';
+    coverBox.style.backgroundPosition = 'center';
+    coverBox.innerHTML = '<button class="btn btn-outline" style="background:rgba(255,255,255,.9)" onclick="openMediaPicker(setCover)">Đổi ảnh</button>';
+  } else {
+    coverBox.style.background = post.cover;
+    coverBox.innerHTML = '<div class="text-center"><div class="text-2xl mb-1">🌄</div><div>Chọn ảnh bìa</div></div>';
+  }
+  coverBox.onclick = () => openMediaPicker(setCover);
+
+  updateEditorStats();
+  hydrateEmbeds($('#editorCanvas'));
+}
+
+function setCover(media) {
+  const data = loadData();
+  const p = data.posts.find(x => x.id === state.editingPostId);
+  if (p && media) {
+    p.coverImage = media.url.startsWith('linear') || media.url.startsWith('#') ? '' : media.url;
+    if (!p.coverImage) p.cover = media.url; // gradient style
+    saveData(data);
+    openEditor(state.editingPostId);
+  }
+}
+
+function updateEditorStats() {
+  const html = $('#editorCanvas').innerHTML;
+  const w = countWords(html);
+  $('#editorWordCount').textContent = w + ' từ';
+  $('#editorReadTime').textContent = readingTime(html) + ' phút đọc';
+}
+
+// Auto-save
+let saveTimer;
+function autoSave() {
+  $('#editorSaveStatus').textContent = 'Đang lưu...';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { savePost(); $('#editorSaveStatus').textContent = '✓ Đã lưu'; }, 700);
+}
+
+function savePost() {
+  const data = loadData();
+  const p = data.posts.find(x => x.id === state.editingPostId);
+  if (!p) return;
+  p.title = $('#editorTitle').value;
+  p.slug = $('#editorSlug').value || slugify(p.title);
+  p.status = $('#editorStatus').value;
+  p.date = $('#editorDate').value;
+  p.tags = $('#editorTags').value.split(',').map(s=>s.trim()).filter(Boolean);
+  p.categoryId = $('#editorCategory').value;
+  p.featured = $('#editorFeatured').checked;
+  p.dropCap = $('#editorDropCap').checked;
+  p.signature = $('#editorSignature').value;
+  p.seoTitle = $('#editorSeoTitle').value;
+  p.seoDesc = $('#editorSeoDesc').value;
+  p.content = $('#editorCanvas').innerHTML;
+  p.excerpt = $('#editorSeoDesc').value || (p.content.replace(/<[^>]+>/g,' ').slice(0,160));
+  p.readTime = readingTime(p.content);
+  saveData(data);
+}
+
+function publishPost() {
+  $('#editorStatus').value = 'published';
+  savePost();
+  toast('🎉 Đã xuất bản!');
+}
+
+function previewPost() {
+  savePost();
+  const p = loadData().posts.find(x => x.id === state.editingPostId);
+  window.open('index.html#/post/' + p.slug, '_blank');
+}
+
+function deletePost() {
+  showConfirm('Xoá bài viết?', 'Bài sẽ bị xoá vĩnh viễn.', () => {
+    const data = loadData();
+    data.posts = data.posts.filter(p => p.id !== state.editingPostId);
+    saveData(data);
+    location.hash = '#/posts';
+    toast('Đã xoá');
+  });
+}
+
+// Editor input events
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'editorTitle') {
+    if (!$('#editorSlug').value || $('#editorSlug').dataset.auto !== 'false') {
+      $('#editorSlug').value = slugify(e.target.value);
+      $('#editorSlug').dataset.auto = 'true';
+    }
+    autoSave();
+  }
+  if (e.target.id === 'editorSlug') {
+    e.target.dataset.auto = 'false';
+    autoSave();
+  }
+  if (e.target.id === 'editorCanvas') {
+    e.target.dataset.empty = e.target.textContent.trim() ? 'false' : 'true';
+    updateEditorStats();
+    autoSave();
+  }
+  if (['editorStatus','editorDate','editorTags','editorFeatured','editorDropCap','editorSignature','editorSeoTitle','editorSeoDesc','editorCategory'].includes(e.target.id)) {
+    autoSave();
+  }
+});
+document.addEventListener('change', (e) => {
+  if (['editorStatus','editorDate','editorFeatured','editorDropCap','editorCategory'].includes(e.target.id)) {
+    autoSave();
+  }
+});
+
+/* =================== FLOATING TOOLBAR =================== */
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  const ft = $('#floatingToolbar'); if (!ft) return;
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { ft.style.display='none'; return; }
+  const range = sel.getRangeAt(0);
+  const editor = $('#editorCanvas');
+  if (!editor || !editor.contains(range.commonAncestorContainer)) { ft.style.display='none'; return; }
+  const rect = range.getBoundingClientRect();
+  if (rect.width === 0) { ft.style.display='none'; return; }
+  ft.style.display = 'block';
+  ft.style.top = (window.scrollY + rect.top - 48) + 'px';
+  ft.style.left = (rect.left + rect.width/2 - ft.offsetWidth/2) + 'px';
+});
+document.addEventListener('mousedown', (e) => {
+  if (e.target.closest('#floatingToolbar')) e.preventDefault();
+});
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#floatingToolbar button');
+  if (!btn) return;
+  const cmd = btn.dataset.cmd;
+  if (['bold','italic','underline','strikeThrough'].includes(cmd)) document.execCommand(cmd);
+  else if (cmd === 'h1') document.execCommand('formatBlock', false, 'H1');
+  else if (cmd === 'h2') document.execCommand('formatBlock', false, 'H2');
+  else if (cmd === 'h3') document.execCommand('formatBlock', false, 'H3');
+  else if (cmd === 'quote') document.execCommand('formatBlock', false, 'BLOCKQUOTE');
+  else if (cmd === 'code') {
+    const sel = window.getSelection().toString();
+    if (sel) document.execCommand('insertHTML', false, `<code>${htmlEscape(sel)}</code>`);
+  } else if (cmd === 'link') {
+    const url = prompt('URL:'); if (url) document.execCommand('createLink', false, url);
+  }
+  updateEditorStats(); autoSave();
+});
+
+/* =================== SLASH MENU =================== */
+const SLASH_ITEMS = [
+  { icon: 'H1', label: 'Heading 1', cat: 'Text', action: () => document.execCommand('formatBlock', false, 'H1') },
+  { icon: 'H2', label: 'Heading 2', cat: 'Text', action: () => document.execCommand('formatBlock', false, 'H2') },
+  { icon: 'H3', label: 'Heading 3', cat: 'Text', action: () => document.execCommand('formatBlock', false, 'H3') },
+  { icon: '❝', label: 'Trích dẫn', cat: 'Text', action: () => document.execCommand('formatBlock', false, 'BLOCKQUOTE') },
+  { icon: '•', label: 'Bullet list', cat: 'Text', action: () => document.execCommand('insertUnorderedList') },
+  { icon: '1.', label: 'Numbered list', cat: 'Text', action: () => document.execCommand('insertOrderedList') },
+  { icon: '☐', label: 'Checklist', cat: 'Text', action: () => document.execCommand('insertHTML', false, '<ul><li>☐ </li></ul>') },
+  { icon: '</>', label: 'Code block', cat: 'Code', action: () => {
+    const lang = prompt('Ngôn ngữ (python, javascript, html...):', 'javascript') || 'plaintext';
+    document.execCommand('insertHTML', false, `<pre><code class="language-${lang}">// code...</code></pre><p></p>`);
+  }},
+  { icon: '📊', label: 'Bảng', cat: 'Structure', action: () => {
+    const rows = parseInt(prompt('Số hàng:','3'))||3;
+    const cols = parseInt(prompt('Số cột:','3'))||3;
+    let html = '<table><thead><tr>';
+    for (let i=0;i<cols;i++) html += '<th>Header</th>';
+    html += '</tr></thead><tbody>';
+    for (let r=0;r<rows;r++){
+      html += '<tr>';
+      for (let c=0;c<cols;c++) html += '<td>Cell</td>';
+      html += '</tr>';
+    }
+    html += '</tbody></table><p></p>';
+    document.execCommand('insertHTML', false, html);
+  }},
+  { icon: '—', label: 'Divider', cat: 'Structure', action: () => document.execCommand('insertHorizontalRule') },
+  { icon: '💡', label: 'Callout', cat: 'Structure', action: () => document.execCommand('insertHTML', false, '<div class="callout">💡 Viết gì đó...</div><p></p>') },
+  { icon: '🖼', label: 'Hình ảnh', cat: 'Media', action: () => openMediaPicker(media => {
+    if (media.type !== 'image') { toast('Hãy chọn file ảnh'); return; }
+    const style = media.url.startsWith('linear') || media.url.startsWith('#')
+      ? `<div style="aspect-ratio:16/9;border-radius:10px;background:${media.url};margin:1rem 0;"></div>`
+      : `<img src="${media.url}" alt="" />`;
+    document.execCommand('insertHTML', false, style + '<p></p>');
+  })},
+  { icon: '🖼🖼', label: 'Gallery (thư viện ảnh)', cat: 'Media', action: () => {
+    const html = `<div class="gallery">
+      <div class="gallery-item" style="background: linear-gradient(135deg, #8b7355, #3d2817);"></div>
+      <div class="gallery-item" style="background: linear-gradient(135deg, #a68968, #5d4529);"></div>
+      <div class="gallery-item" style="background: linear-gradient(135deg, #6b5d42, #2d1e10);"></div>
+      <div class="gallery-item" style="background: linear-gradient(135deg, #8a7055, #453020);"></div>
+    </div><p></p>`;
+    document.execCommand('insertHTML', false, html);
+  }},
+  { icon: '▶', label: 'YouTube video', cat: 'Media', action: () => {
+    const u = prompt('URL YouTube:');
+    if (!u) return;
+    const id = u.match(/(?:v=|youtu\.be\/|embed\/)([\w-]+)/)?.[1];
+    if (id) document.execCommand('insertHTML', false, `<div class="embed-youtube" data-video-id="${id}"></div><p></p>`);
+    else toast('URL không hợp lệ');
+  }},
+  { icon: 'V', label: 'Vimeo video', cat: 'Media', action: () => {
+    const u = prompt('URL Vimeo:');
+    if (!u) return;
+    const id = u.match(/vimeo\.com\/(\d+)/)?.[1];
+    if (id) document.execCommand('insertHTML', false, `<div class="embed-vimeo" data-video-id="${id}"></div><p></p>`);
+  }},
+  { icon: '🎬', label: 'Video upload (mp4)', cat: 'Media', action: () => openMediaPicker(media => {
+    if (media.type !== 'video') { toast('Hãy chọn file video'); return; }
+    document.execCommand('insertHTML', false, `<video src="${media.url}" controls></video><p></p>`);
+  })},
+  { icon: '🎵', label: 'Spotify', cat: 'Media', action: () => {
+    const u = prompt('Spotify URL (playlist/track/album):');
+    if (!u) return;
+    const m = u.match(/spotify\.com\/(playlist|track|album)\/([\w]+)/);
+    if (m) document.execCommand('insertHTML', false, `<div class="embed-spotify" data-spotify-id="${m[2]}" data-spotify-type="${m[1]}"></div><p></p>`);
+  }},
+  { icon: '🔊', label: 'SoundCloud', cat: 'Media', action: () => {
+    const u = prompt('SoundCloud URL:');
+    if (u) document.execCommand('insertHTML', false, `<div class="embed-soundcloud" data-sc-url="${u}"></div><p></p>`);
+  }},
+  { icon: '𝕏', label: 'Tweet / X post', cat: 'Media', action: () => {
+    const u = prompt('Tweet URL:');
+    if (u) document.execCommand('insertHTML', false, `<div class="embed-twitter" data-tweet-url="${u}"></div><p></p>`);
+  }},
+  { icon: '🗺', label: 'Google Maps', cat: 'Media', action: () => {
+    const q = prompt('Địa điểm (ví dụ: Đà Lạt, Việt Nam):');
+    if (q) {
+      const src = `https://www.google.com/maps?q=${encodeURIComponent(q)}&output=embed`;
+      document.execCommand('insertHTML', false, `<div style="margin:1rem 0;border-radius:10px;overflow:hidden;"><iframe src="${src}" width="100%" height="360" style="border:0;" allowfullscreen loading="lazy"></iframe></div><p></p>`);
+    }
+  }},
+  { icon: '🔘', label: 'Nút CTA (Call to action)', cat: 'Structure', action: () => {
+    const txt = prompt('Text nút:', 'Nhấn vào đây');
+    const url = prompt('URL:', '#');
+    if (txt) document.execCommand('insertHTML', false, `<p style="text-align:center;margin:1.5rem 0;"><a href="${url}" style="display:inline-block;background:var(--accent);color:white;padding:.7rem 1.5rem;border-radius:8px;text-decoration:none;font-weight:500;">${txt}</a></p>`);
+  }},
+];
+
+const slashMenu = $('#slashMenu');
+let slashActive = 0;
+
+function showSlashMenu(query='') {
+  const items = SLASH_ITEMS.filter(it =>
+    it.label.toLowerCase().includes(query.toLowerCase()) ||
+    it.cat.toLowerCase().includes(query.toLowerCase())
+  );
+  if (!items.length) { slashMenu.style.display='none'; return; }
+  slashActive = 0;
+  let lastCat = '';
+  slashMenu.innerHTML = items.map((it, i) => {
+    let catHeader = '';
+    if (it.cat !== lastCat) {
+      catHeader = `<div class="text-xs font-medium px-3 py-1 mt-1" style="color: var(--fg-muted);">${it.cat.toUpperCase()}</div>`;
+      lastCat = it.cat;
+    }
+    return catHeader + `<div class="slash-item ${i===0?'active':''}" data-idx="${i}">
+      <div class="slash-icon">${it.icon}</div>
+      <div class="text-sm font-medium">${it.label}</div>
+    </div>`;
+  }).join('');
+  slashMenu._items = items;
+  const sel = window.getSelection();
+  if (sel.rangeCount === 0) return;
+  const rect = sel.getRangeAt(0).getBoundingClientRect();
+  slashMenu.style.display = 'block';
+  slashMenu.style.top = (window.scrollY + rect.bottom + 4) + 'px';
+  slashMenu.style.left = rect.left + 'px';
+  $$('.slash-item').forEach(el => {
+    el.onmousedown = (e) => { e.preventDefault(); executeSlash(parseInt(el.dataset.idx)); };
+  });
+}
+
+function executeSlash(idx) {
+  const item = slashMenu._items?.[idx]; if (!item) return;
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType === 3) {
+      const text = node.textContent;
+      const slashIdx = text.lastIndexOf('/', range.startOffset-1);
+      if (slashIdx >= 0) { range.setStart(node, slashIdx); range.deleteContents(); }
+    }
+  }
+  item.action();
+  slashMenu.style.display = 'none';
+  updateEditorStats(); autoSave();
+  $('#editorCanvas')?.focus();
+}
+
+document.addEventListener('keyup', (e) => {
+  if (e.target.id !== 'editorCanvas') return;
+  const sel = window.getSelection();
+  if (sel.rangeCount === 0) return;
+  const node = sel.getRangeAt(0).startContainer;
+  if (node.nodeType !== 3) { slashMenu.style.display='none'; return; }
+  const text = node.textContent.slice(0, sel.getRangeAt(0).startOffset);
+  const match = text.match(/\/([a-zA-ZÀ-ỹ0-9]*)$/);
+  if (match) showSlashMenu(match[1]);
+  else slashMenu.style.display = 'none';
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.id !== 'editorCanvas' || slashMenu.style.display !== 'block') return;
+  const items = slashMenu._items || [];
+  if (e.key === 'ArrowDown') {
+    e.preventDefault(); slashActive = (slashActive+1) % items.length;
+    $$('.slash-item').forEach((el,i) => el.classList.toggle('active', i===slashActive));
+    const active = slashMenu.querySelector('.slash-item.active');
+    if (active) active.scrollIntoView({block:'nearest'});
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); slashActive = (slashActive-1+items.length) % items.length;
+    $$('.slash-item').forEach((el,i) => el.classList.toggle('active', i===slashActive));
+  } else if (e.key === 'Enter') { e.preventDefault(); executeSlash(slashActive); }
+  else if (e.key === 'Escape') { slashMenu.style.display = 'none'; }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey||e.metaKey) && e.key === 's' && state.view === 'editor') {
+    e.preventDefault(); savePost(); toast('Đã lưu');
+  }
+});
+
+/* =================== MEDIA LIBRARY =================== */
+function renderMedia() {
+  const data = loadData();
+  function doRender() {
+    const q = $('#mediaSearch').value.toLowerCase();
+    const type = $('#mediaTypeFilter').value;
+    let items = data.media || [];
+    if (type !== 'all') items = items.filter(m => m.type === type);
+    if (q) items = items.filter(m => m.name.toLowerCase().includes(q));
+    $('#mediaGrid').innerHTML = items.length ? items.map(m => `
+      <div class="media-item" onclick="mediaDetail('${m.id}')">
+        <div class="media-thumb" style="background: ${m.url && !m.url.startsWith('linear') && !m.url.startsWith('#') ? `url(${m.url}) center/cover` : m.url || 'var(--bg-2)'};">
+          ${m.type === 'video' ? '🎬' : m.type === 'audio' ? '🎵' : m.url ? '' : '🖼'}
+        </div>
+        <div class="p-2">
+          <div class="text-xs font-medium truncate">${m.name}</div>
+          <div class="text-xs" style="color: var(--fg-muted);">${fmtSize(m.size)} • ${m.date}</div>
+        </div>
+      </div>
+    `).join('') : '<div class="text-center py-12 col-span-full" style="color: var(--fg-muted);">Chưa có file nào. Bấm "Upload file" để thêm.</div>';
+  }
+  doRender();
+  $('#mediaSearch').oninput = doRender;
+  $('#mediaTypeFilter').onchange = doRender;
+}
+
+function uploadMedia() {
+  $('#mediaUploadInput').click();
+}
+
+$('#mediaUploadInput').addEventListener('change', async (e) => {
+  const files = [...e.target.files];
+  if (!files.length) return;
+  const data = loadData();
+  data.media = data.media || [];
+  for (const file of files) {
+    const url = await fileToDataUrl(file);
+    const type = file.type.startsWith('image') ? 'image' : file.type.startsWith('video') ? 'video' : file.type.startsWith('audio') ? 'audio' : 'image';
+    data.media.unshift({
+      id: 'm' + Date.now() + Math.random().toString(36).slice(2,6),
+      type, name: file.name, size: Math.round(file.size/1024),
+      url, date: new Date().toISOString().slice(0,10)
+    });
+  }
+  saveData(data);
+  toast(`Đã upload ${files.length} file`);
+  if (state.view === 'media') renderMedia();
+  e.target.value = '';
+});
+
+function fileToDataUrl(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(file);
+  });
+}
+
+function mediaDetail(id) {
+  const data = loadData();
+  const m = data.media.find(x => x.id === id);
+  if (!m) return;
+  if (confirm(`File: ${m.name}\nDung lượng: ${fmtSize(m.size)}\n\nXoá file này?`)) {
+    data.media = data.media.filter(x => x.id !== id);
+    saveData(data);
+    renderMedia();
+    toast('Đã xoá');
+  }
+}
+
+/* Media picker (used by editor) */
+function openMediaPicker(cb) {
+  state.pickerCb = cb;
+  const data = loadData();
+  const modal = $('#mediaPickerModal');
+  const grid = $('#mediaPickerGrid');
+  function doRender() {
+    grid.innerHTML = (data.media||[]).map(m => `
+      <div class="media-item" onclick="selectMedia('${m.id}')">
+        <div class="media-thumb" style="background: ${m.url && !m.url.startsWith('linear') && !m.url.startsWith('#') ? `url(${m.url}) center/cover` : m.url || 'var(--bg-2)'};">
+          ${m.type === 'video' ? '🎬' : m.type === 'audio' ? '🎵' : m.url ? '' : '🖼'}
+        </div>
+        <div class="p-2 text-xs truncate">${m.name}</div>
+      </div>
+    `).join('');
+  }
+  doRender();
+  modal.classList.add('show');
+}
+
+function closeMediaPicker() {
+  $('#mediaPickerModal').classList.remove('show');
+  state.pickerCb = null;
+}
+
+function selectMedia(id) {
+  const m = loadData().media.find(x => x.id === id);
+  if (state.pickerCb) state.pickerCb(m);
+  closeMediaPicker();
+}
+
+$('#pickerUploadInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const data = loadData();
+  const url = await fileToDataUrl(file);
+  const type = file.type.startsWith('image') ? 'image' : file.type.startsWith('video') ? 'video' : 'image';
+  const m = { id: 'm' + Date.now(), type, name: file.name, size: Math.round(file.size/1024), url, date: new Date().toISOString().slice(0,10) };
+  data.media = data.media || [];
+  data.media.unshift(m);
+  saveData(data);
+  if (state.pickerCb) state.pickerCb(m);
+  closeMediaPicker();
+  e.target.value = '';
+});
+
+/* =================== COMMENTS =================== */
+function renderComments() {
+  const data = loadData();
+  function doRender() {
+    const filter = $('#commentFilter').value;
+    let comments = data.comments || [];
+    if (filter === 'pending') comments = comments.filter(c => !c.approved);
+    else if (filter === 'approved') comments = comments.filter(c => c.approved);
+    const total = (data.comments||[]).length;
+    const pending = (data.comments||[]).filter(c => !c.approved).length;
+    $('#commentsStats').textContent = `${total} bình luận • ${pending} chờ duyệt`;
+    $('#commentsTable').innerHTML = comments.length ? comments.map(c => {
+      const post = getPostById(c.postId);
+      return `<div class="card">
+        <div class="flex items-start justify-between gap-3 mb-2">
+          <div class="flex items-center gap-2">
+            <strong>${htmlEscape(c.author)}</strong>
+            <span class="text-xs" style="color: var(--fg-muted);">${c.email}</span>
+            <span class="badge ${c.approved?'badge-success':'badge-warning'}">${c.approved?'Đã duyệt':'Chờ duyệt'}</span>
+          </div>
+          <span class="text-xs" style="color: var(--fg-muted);">${fmtDateTime(c.date)}</span>
+        </div>
+        <div class="text-sm mb-3">${htmlEscape(c.content)}</div>
+        <div class="flex items-center justify-between text-xs">
+          <a href="#/editor/${post?.id}" style="color: var(--accent);">Trên: ${post?.title||'(bài đã xoá)'}</a>
+          <div class="flex gap-1">
+            ${!c.approved ? `<button onclick="approveComment('${c.id}')" class="btn btn-outline" style="padding:.3rem .6rem;font-size:.75rem;color:var(--success);">✓ Duyệt</button>` : `<button onclick="unapproveComment('${c.id}')" class="btn btn-outline" style="padding:.3rem .6rem;font-size:.75rem;">Huỷ duyệt</button>`}
+            <button onclick="deleteComment('${c.id}')" class="btn btn-outline" style="padding:.3rem .6rem;font-size:.75rem;color:var(--danger);">🗑 Xoá</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('') : '<div class="text-center py-12" style="color: var(--fg-muted);">Không có bình luận nào.</div>';
+  }
+  doRender();
+  $('#commentFilter').onchange = doRender;
+}
+
+function approveComment(id) {
+  const data = loadData();
+  const c = data.comments.find(x => x.id === id);
+  if (c) { c.approved = true; saveData(data); renderComments(); updateBadges(); toast('Đã duyệt'); }
+}
+function unapproveComment(id) {
+  const data = loadData();
+  const c = data.comments.find(x => x.id === id);
+  if (c) { c.approved = false; saveData(data); renderComments(); updateBadges(); }
+}
+function deleteComment(id) {
+  if (!confirm('Xoá bình luận?')) return;
+  const data = loadData();
+  data.comments = data.comments.filter(x => x.id !== id);
+  saveData(data); renderComments(); updateBadges();
+}
+
+/* =================== CATEGORIES =================== */
+function renderCategoriesAdmin() {
+  const data = loadData();
+  $('#categoriesTableBody').innerHTML = data.categories.map(c => {
+    const count = data.posts.filter(p => p.categoryId === c.id).length;
+    return `<tr>
+      <td>
+        <input class="input" value="${c.name}" onchange="updateCat('${c.id}','name',this.value)" />
+      </td>
+      <td><input class="input font-mono" style="font-size:.8rem;" value="${c.slug}" onchange="updateCat('${c.id}','slug',this.value)" /></td>
+      <td><input type="color" value="${c.color}" onchange="updateCat('${c.id}','color',this.value)" /></td>
+      <td>${count}</td>
+      <td class="text-right"><button onclick="deleteCategory('${c.id}')" class="btn btn-ghost" style="color:var(--danger);font-size:.75rem;">Xoá</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function addCategory() {
+  const name = prompt('Tên chuyên mục:');
+  if (!name) return;
+  const data = loadData();
+  data.categories.push({
+    id: 'cat' + Date.now(),
+    name, slug: slugify(name),
+    color: '#' + Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0'),
+  });
+  saveData(data); renderCategoriesAdmin();
+}
+
+function updateCat(id, field, value) {
+  const data = loadData();
+  const c = data.categories.find(x => x.id === id);
+  if (c) { c[field] = value; saveData(data); }
+}
+
+function deleteCategory(id) {
+  if (!confirm('Xoá chuyên mục? Các bài thuộc chuyên mục này sẽ không có chuyên mục.')) return;
+  const data = loadData();
+  data.categories = data.categories.filter(c => c.id !== id);
+  data.posts.forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
+  saveData(data); renderCategoriesAdmin();
+}
+
+/* =================== SUBSCRIBERS =================== */
+function renderSubscribers() {
+  const data = loadData();
+  const subs = data.subscribers || [];
+  $('#subCount').textContent = subs.length;
+  $('#subsTableBody').innerHTML = subs.length ? subs.map((email, i) => `
+    <tr>
+      <td>${email}</td>
+      <td class="text-xs" style="color: var(--fg-muted);">${fmtDateShort(new Date(Date.now() - i*86400000).toISOString())}</td>
+      <td class="text-right"><button onclick="removeSub('${email}')" class="btn btn-ghost" style="color: var(--danger); font-size:.75rem;">Xoá</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="3" class="text-center py-6" style="color: var(--fg-muted);">Chưa có ai đăng ký.</td></tr>`;
+}
+
+function removeSub(email) {
+  const data = loadData();
+  data.subscribers = (data.subscribers||[]).filter(e => e !== email);
+  saveData(data); renderSubscribers();
+}
+
+function exportSubs() {
+  const data = loadData();
+  const csv = 'Email\n' + (data.subscribers||[]).join('\n');
+  download('subscribers.csv', csv);
+  toast('Đã tải CSV');
+}
+
+function download(filename, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
+  a.download = filename; a.click();
+}
+
+/* =================== SETTINGS =================== */
+function renderSettings() {
+  const s = getSettings();
+  $('#setSiteTitle').value = s.siteTitle;
+  $('#setSiteTagline').value = s.siteTagline;
+  $('#setSiteDesc').value = s.siteDescription;
+  $('#setAuthorName').value = s.authorName;
+  $('#setAuthorBio').value = s.authorBio;
+  $('#setAuthorEmail').value = s.authorEmail;
+  $('#setAccent').value = s.accent;
+  $('#setDefaultTheme').value = s.defaultTheme;
+  $('#setShowReactions').checked = s.showReactions;
+  $('#setShowComments').checked = s.showComments;
+  $('#setCookieConsent').checked = s.cookieConsent;
+  $('#setFB').value = s.social.facebook || '';
+  $('#setTW').value = s.social.twitter || '';
+  $('#setIG').value = s.social.instagram || '';
+  $('#setGH').value = s.social.github || '';
+  $('#setSeoTitle').value = s.seo.defaultTitle;
+  $('#setSeoDesc').value = s.seo.defaultDesc;
+}
+
+function saveSettings() {
+  const data = loadData();
+  data.settings = {
+    siteTitle: $('#setSiteTitle').value,
+    siteTagline: $('#setSiteTagline').value,
+    siteDescription: $('#setSiteDesc').value,
+    authorName: $('#setAuthorName').value,
+    authorBio: $('#setAuthorBio').value,
+    authorEmail: $('#setAuthorEmail').value,
+    authorAvatar: '',
+    accent: $('#setAccent').value,
+    defaultTheme: $('#setDefaultTheme').value,
+    showReactions: $('#setShowReactions').checked,
+    showComments: $('#setShowComments').checked,
+    cookieConsent: $('#setCookieConsent').checked,
+    social: {
+      facebook: $('#setFB').value,
+      twitter: $('#setTW').value,
+      instagram: $('#setIG').value,
+      github: $('#setGH').value,
+    },
+    seo: {
+      defaultTitle: $('#setSeoTitle').value,
+      defaultDesc: $('#setSeoDesc').value,
+    },
+  };
+  saveData(data);
+  document.documentElement.style.setProperty('--accent', data.settings.accent);
+  $('#adminSiteTitle').textContent = data.settings.siteTitle;
+  toast('✓ Đã lưu cài đặt');
+}
+
+function exportData() {
+  const data = loadData();
+  download('blog-data.json', JSON.stringify(data, null, 2));
+  toast('Đã tải backup');
+}
+
+function resetData() {
+  if (!confirm('Reset về dữ liệu demo? TOÀN BỘ bài viết, media, bình luận, cài đặt sẽ mất.')) return;
+  if (!confirm('Bạn chắc chắn? Không thể hoàn tác.')) return;
+  localStorage.removeItem(BLOG_STORAGE_KEY);
+  location.reload();
+}
+
+/* =================== CONFIRM MODAL =================== */
+function showConfirm(title, msg, cb) {
+  $('#confirmTitle').textContent = title;
+  $('#confirmMessage').textContent = msg;
+  state.confirmCb = cb;
+  $('#confirmModal').classList.add('show');
+}
+function closeConfirm() { $('#confirmModal').classList.remove('show'); state.confirmCb = null; }
+function confirmYes() { if (state.confirmCb) state.confirmCb(); closeConfirm(); }
+
+/* =================== INIT =================== */
+$('#adminSiteTitle').textContent = getSettings().siteTitle;
+document.documentElement.style.setProperty('--accent', getSettings().accent);
+checkAdminSession();
+</script>
+</body>
+</html>
