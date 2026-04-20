@@ -1140,7 +1140,7 @@ function renderPostsList() {
 
 function confirmDelete(id) {
   showConfirm('Xoá bài viết?', 'Bài viết sẽ bị xoá vĩnh viễn, không thể khôi phục.', () => {
-    deletePostOnApi(id).catch(() => {});
+    deletePostOnApi(id).catch(() => { toast('Xóa API lỗi, đã xóa local'); });
     const data = loadData();
     data.posts = data.posts.filter(p => p.id !== id);
     saveData(data);
@@ -1295,7 +1295,7 @@ async function previewPost() {
 
 function deletePost() {
   showConfirm('Xoá bài viết?', 'Bài sẽ bị xoá vĩnh viễn.', () => {
-    deletePostOnApi(state.editingPostId).catch(() => {});
+    deletePostOnApi(state.editingPostId).catch(() => { toast('Xóa API lỗi, đã xóa local'); });
     const data = loadData();
     data.posts = data.posts.filter(p => p.id !== state.editingPostId);
     saveData(data);
@@ -1706,7 +1706,7 @@ function approveComment(id) {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id, approved: true }),
-      }).catch(() => {});
+      }).catch(() => { toast('Không thể cập nhật duyệt bình luận lên server'); });
     });
     c.approved = true; saveData(data); renderComments(); updateBadges(); toast('Đã duyệt');
   }
@@ -1721,7 +1721,7 @@ function unapproveComment(id) {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id, approved: false }),
-      }).catch(() => {});
+      }).catch(() => { toast('Không thể cập nhật duyệt bình luận lên server'); });
     });
     c.approved = false; saveData(data); renderComments(); updateBadges();
   }
@@ -1733,7 +1733,7 @@ function deleteComment(id) {
       method: 'DELETE',
       credentials: 'include',
       headers: { 'x-csrf-token': getCsrfToken() },
-    }).catch(() => {});
+    }).catch(() => { toast('Không thể xóa bình luận trên server'); });
   });
   const data = loadData();
   data.comments = data.comments.filter(x => x.id !== id);
@@ -1839,7 +1839,7 @@ function removeSub(email) {
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id: found.id }),
-      }).catch(() => {});
+      }).catch(() => { toast('Không thể xóa subscriber trên server'); });
     });
   }
   data.subscribers = (data.subscribers||[]).filter(e => e !== email);
@@ -1914,7 +1914,7 @@ function saveSettings() {
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
       body: JSON.stringify({ settings: data.settings }),
-    }).catch(() => {});
+    }).catch(() => { toast('Không thể lưu settings lên server'); });
   });
   document.documentElement.style.setProperty('--accent', data.settings.accent);
   $('#adminSiteTitle').textContent = data.settings.siteTitle;

@@ -117,4 +117,10 @@ Phần Admin của BlogMMO đã được hoàn thiện theo hướng vận hành
 3. Thêm pagination/filter nâng cao cho audit history
 4. Gắn alerting khi có hành vi admin bất thường (nhiều failed actions)
 
+## 8) V2 Frontend Mapping Update (same day)
+- Đã chuyển frontend blog-v2 từ localStorage-only sang backend-first cho các luồng chính:
+  - posts, categories, comments, subscribers, site settings
+- Admin v2 giữ fallback local khi API lỗi nhưng đã bổ sung toast thông báo rõ ràng (không silent fail).
+- Public v2 vẫn đọc cache local nhanh nhưng đồng bộ dữ liệu từ API ở các điểm chính.
+
 Admin module hiện tại đã đạt mức usable + governable cho production vận hành nhỏ/medium.
