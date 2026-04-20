@@ -32,6 +32,33 @@ model AdminAuditLog {
   @@index([resource, action])
 }
 
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  author    String
+  email     String
+  content   String
+  approved  Boolean  @default(false)
+  likes     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([postId])
+  @@index([approved])
+}
+
+model Subscriber {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 model Post {
   id          String    @id @default(cuid())
   title       String

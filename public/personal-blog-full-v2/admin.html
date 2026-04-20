@@ -739,6 +739,9 @@ async function checkAdminSession(showToastMsg = false) {
     if (isLoggedIn) {
       await syncPostsFromApi();
       await syncCategoriesFromApi();
+      await syncCommentsFromApi();
+      await syncSubscribersFromApi();
+      await syncSiteSettingsFromApi();
       showApp();
       if (showToastMsg) toast('Xác thực admin thành công');
     } else {
@@ -830,6 +833,52 @@ async function syncCategoriesFromApi() {
       slug: c.slug,
       color: c.color || '#c2410c',
     }));
+    saveData(data);
+  } catch {}
+}
+
+async function syncCommentsFromApi() {
+  try {
+    const res = await fetch('/api/comments', { credentials: 'include' });
+    if (!res.ok) return;
+    const payload = await res.json();
+    const rows = Array.isArray(payload?.comments) ? payload.comments : [];
+    const data = loadData();
+    data.comments = rows.map((c) => ({
+      id: c.id,
+      postId: c.postId,
+      author: c.author,
+      email: c.email,
+      content: c.content,
+      approved: !!c.approved,
+      likes: Number(c.likes || 0),
+      date: String(c.createdAt || '').slice(0, 16).replace('T', ' '),
+    }));
+    saveData(data);
+  } catch {}
+}
+
+async function syncSubscribersFromApi() {
+  try {
+    const res = await fetch('/api/subscribers', { credentials: 'include' });
+    if (!res.ok) return;
+    const payload = await res.json();
+    const rows = Array.isArray(payload?.subscribers) ? payload.subscribers : [];
+    const data = loadData();
+    data.subscribers = rows.map((r) => r.email);
+    data._subscriberMap = rows.map((r) => ({ id: r.id, email: r.email, createdAt: r.createdAt }));
+    saveData(data);
+  } catch {}
+}
+
+async function syncSiteSettingsFromApi() {
+  try {
+    const res = await fetch('/api/site-settings', { credentials: 'include' });
+    if (!res.ok) return;
+    const payload = await res.json();
+    if (!payload?.settings) return;
+    const data = loadData();
+    data.settings = payload.settings;
     saveData(data);
   } catch {}
 }
@@ -1650,15 +1699,42 @@ function renderComments() {
 function approveComment(id) {
   const data = loadData();
   const c = data.comments.find(x => x.id === id);
-  if (c) { c.approved = true; saveData(data); renderComments(); updateBadges(); toast('Đã duyệt'); }
+  if (c) {
+    ensureCsrfToken().then(() => {
+      fetch('/api/comments', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
+        body: JSON.stringify({ id, approved: true }),
+      }).catch(() => {});
+    });
+    c.approved = true; saveData(data); renderComments(); updateBadges(); toast('Đã duyệt');
+  }
 }
 function unapproveComment(id) {
   const data = loadData();
   const c = data.comments.find(x => x.id === id);
-  if (c) { c.approved = false; saveData(data); renderComments(); updateBadges(); }
+  if (c) {
+    ensureCsrfToken().then(() => {
+      fetch('/api/comments', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
+        body: JSON.stringify({ id, approved: false }),
+      }).catch(() => {});
+    });
+    c.approved = false; saveData(data); renderComments(); updateBadges();
+  }
 }
 function deleteComment(id) {
   if (!confirm('Xoá bình luận?')) return;
+  ensureCsrfToken().then(() => {
+    fetch(`/api/comments/${id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: { 'x-csrf-token': getCsrfToken() },
+    }).catch(() => {});
+  });
   const data = loadData();
   data.comments = data.comments.filter(x => x.id !== id);
   saveData(data); renderComments(); updateBadges();
@@ -1754,6 +1830,18 @@ function renderSubscribers() {
 
 function removeSub(email) {
   const data = loadData();
+  const map = data._subscriberMap || [];
+  const found = map.find((x) => x.email === email);
+  if (found?.id) {
+    ensureCsrfToken().then(() => {
+      fetch('/api/subscribers', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
+        body: JSON.stringify({ id: found.id }),
+      }).catch(() => {});
+    });
+  }
   data.subscribers = (data.subscribers||[]).filter(e => e !== email);
   saveData(data); renderSubscribers();
 }
@@ -1820,6 +1908,14 @@ function saveSettings() {
     },
   };
   saveData(data);
+  ensureCsrfToken().then(() => {
+    fetch('/api/site-settings', {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
+      body: JSON.stringify({ settings: data.settings }),
+    }).catch(() => {});
+  });
   document.documentElement.style.setProperty('--accent', data.settings.accent);
   $('#adminSiteTitle').textContent = data.settings.siteTitle;
   toast('✓ Đã lưu cài đặt');

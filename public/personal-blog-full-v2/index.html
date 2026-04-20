@@ -524,7 +524,8 @@ let state = {
   selectedTag: null,
   selectedCategory: null,
   reactions: JSON.parse(localStorage.getItem('reactions') || '{}'),
-  bookmarks: JSON.parse(localStorage.getItem('bookmarks') || '[]'),
+ bookmarks: JSON.parse(localStorage.getItem('bookmarks') || '[]'),
+ commentsSynced: false,
 };
 
 const $ = (s) => document.querySelector(s);
@@ -573,7 +574,8 @@ window.addEventListener('hashchange', route);
 
 /* =================== SETTINGS APPLY =================== */
 function applySettings() {
-  const s = getSettings();
+ const data = loadData();
+ const s = data.settings;
   $('#siteTitle').textContent = s.siteTitle;
   $('#siteTagline').textContent = s.siteTagline;
   $('#siteAvatar').textContent = s.siteTitle.charAt(0).toUpperCase();
@@ -592,7 +594,17 @@ function applySettings() {
   document.documentElement.style.setProperty('--accent', s.accent);
   // Subscribers count
   const data = loadData();
-  $('#subscriberCount').textContent = (data.subscribers || []).length;
+ $('#subscriberCount').textContent = (data.subscribers || []).length;
+
+ fetch('/api/site-settings')
+   .then(r => r.ok ? r.json() : null)
+   .then(payload => {
+     if (!payload?.settings) return;
+     const d = loadData();
+     d.settings = payload.settings;
+     saveData(d);
+   })
+   .catch(() => {});
 }
 
 /* =================== HOME =================== */
@@ -787,10 +799,34 @@ function bookmarkPost() {
 
 /* =================== COMMENTS =================== */
 function renderComments(postId) {
-  const data = loadData();
-  const comments = (data.comments||[]).filter(c => c.postId === postId && c.approved);
-  $('#commentCount').textContent = `(${comments.length})`;
-  $('#commentsList').innerHTML = comments.length
+ const data = loadData();
+ const localComments = (data.comments||[]).filter(c => c.postId === postId && c.approved);
+
+ if (!state.commentsSynced) {
+   fetch('/api/comments?approved=true')
+     .then(r => r.ok ? r.json() : null)
+     .then(payload => {
+       if (!payload?.comments) return;
+       data.comments = payload.comments.map(c => ({
+         id: c.id,
+         postId: c.postId,
+         author: c.author,
+         email: c.email,
+         content: c.content,
+         approved: !!c.approved,
+         likes: Number(c.likes || 0),
+         date: String(c.createdAt || '').slice(0,16).replace('T',' '),
+       }));
+       saveData(data);
+       state.commentsSynced = true;
+       renderComments(postId);
+     })
+     .catch(() => {});
+ }
+
+ const comments = localComments;
+ $('#commentCount').textContent = `(${comments.length})`;
+ $('#commentsList').innerHTML = comments.length
     ? comments.map(c => {
         const initial = c.author.charAt(0).toUpperCase();
         const color = '#' + Math.abs(hashCode(c.author)).toString(16).slice(0,6).padEnd(6,'0');
@@ -828,14 +864,24 @@ function postComment(e) {
   if (!author || !email || !content) return;
   const data = loadData();
   data.comments = data.comments || [];
-  data.comments.push({
+ data.comments.push({
     id: 'c' + Date.now(),
     postId: getPostBySlug(state.currentSlug).id,
     author, email, content,
     date: new Date().toISOString().slice(0,16).replace('T',' '),
     approved: false, likes: 0
   });
-  saveData(data);
+ saveData(data);
+ fetch('/api/comments', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+     postId: getPostBySlug(state.currentSlug).id,
+     author,
+     email,
+     content,
+   }),
+ }).catch(() => {});
   $('#commentAuthor').value = '';
   $('#commentEmail').value = '';
   $('#commentContent').value = '';
@@ -845,7 +891,16 @@ function postComment(e) {
 function likeComment(id) {
   const data = loadData();
   const c = data.comments.find(x => x.id === id);
-  if (c) { c.likes = (c.likes||0) + 1; saveData(data); renderComments(c.postId); }
+  if (c) {
+    c.likes = (c.likes||0) + 1;
+    saveData(data);
+    fetch(`/api/comments/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ likes: c.likes }),
+    }).catch(() => {});
+    renderComments(c.postId);
+  }
 }
 
 /* =================== ARCHIVE =================== */
@@ -1026,10 +1081,15 @@ function subscribeNewsletter(e) {
   const email = e.target.querySelector('input').value;
   const data = loadData();
   data.subscribers = data.subscribers || [];
-  if (!data.subscribers.includes(email)) {
-    data.subscribers.push(email);
-    saveData(data);
-  }
+ if (!data.subscribers.includes(email)) {
+ data.subscribers.push(email);
+ saveData(data);
+ }
+ fetch('/api/subscribers', {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({ email }),
+ }).catch(() => {});
   $('#subscriberCount').textContent = data.subscribers.length;
   toast('Cảm ơn bạn đã đăng ký! ✨');
   e.target.reset();
