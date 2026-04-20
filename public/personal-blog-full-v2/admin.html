@@ -738,6 +738,7 @@ async function checkAdminSession(showToastMsg = false) {
     isLoggedIn = res.ok;
     if (isLoggedIn) {
       await syncPostsFromApi();
+      await syncCategoriesFromApi();
       showApp();
       if (showToastMsg) toast('Xác thực admin thành công');
     } else {
@@ -814,6 +815,61 @@ async function syncPostsFromApi() {
     }));
     saveData(data);
   } catch {}
+}
+
+async function syncCategoriesFromApi() {
+  try {
+    const res = await fetch('/api/categories', { credentials: 'include' });
+    if (!res.ok) return;
+    const payload = await res.json();
+    const rows = Array.isArray(payload?.categories) ? payload.categories : [];
+    const data = loadData();
+    data.categories = rows.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      color: c.color || '#c2410c',
+    }));
+    saveData(data);
+  } catch {}
+}
+
+async function createCategoryOnApi(name, slug) {
+  await ensureCsrfToken();
+  const csrf = getCsrfToken();
+  const res = await fetch('/api/categories', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+    body: JSON.stringify({ name, slug }),
+  });
+  if (!res.ok) throw new Error('Create category failed');
+  return res.json();
+}
+
+async function updateCategoryOnApi(id, patch) {
+  await ensureCsrfToken();
+  const csrf = getCsrfToken();
+  const res = await fetch(`/api/categories/${id}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf },
+    body: JSON.stringify(patch),
+  });
+  if (!res.ok) throw new Error('Update category failed');
+  return res.json();
+}
+
+async function deleteCategoryOnApi(id) {
+  await ensureCsrfToken();
+  const csrf = getCsrfToken();
+  const res = await fetch(`/api/categories/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: { 'x-csrf-token': csrf },
+  });
+  if (!res.ok) throw new Error('Delete category failed');
+  return res.json();
 }
 
 async function saveCurrentPostToApi(post) {
@@ -1629,26 +1685,57 @@ function addCategory() {
   const name = prompt('Tên chuyên mục:');
   if (!name) return;
   const data = loadData();
-  data.categories.push({
-    id: 'cat' + Date.now(),
-    name, slug: slugify(name),
-    color: '#' + Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0'),
-  });
-  saveData(data); renderCategoriesAdmin();
+  createCategoryOnApi(name, slugify(name))
+    .then(() => syncCategoriesFromApi())
+    .then(() => {
+      renderCategoriesAdmin();
+      toast('Đã thêm chuyên mục');
+    })
+    .catch(() => {
+      data.categories.push({
+        id: 'cat' + Date.now(),
+        name,
+        slug: slugify(name),
+        color: '#' + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, '0'),
+      });
+      saveData(data);
+      renderCategoriesAdmin();
+      toast('API lỗi, đã lưu local');
+    });
 }
 
 function updateCat(id, field, value) {
   const data = loadData();
   const c = data.categories.find(x => x.id === id);
-  if (c) { c[field] = value; saveData(data); }
+  if (c) {
+    c[field] = value;
+    saveData(data);
+    const patch = field === 'name' || field === 'slug' ? { [field]: value } : null;
+    if (patch) {
+      updateCategoryOnApi(id, patch)
+        .then(() => syncCategoriesFromApi())
+        .then(() => renderCategoriesAdmin())
+        .catch(() => toast('Cập nhật category API lỗi, giữ local'));
+    }
+  }
 }
 
 function deleteCategory(id) {
   if (!confirm('Xoá chuyên mục? Các bài thuộc chuyên mục này sẽ không có chuyên mục.')) return;
   const data = loadData();
-  data.categories = data.categories.filter(c => c.id !== id);
-  data.posts.forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
-  saveData(data); renderCategoriesAdmin();
+  deleteCategoryOnApi(id)
+    .then(() => syncCategoriesFromApi())
+    .then(() => {
+      renderCategoriesAdmin();
+      toast('Đã xoá chuyên mục');
+    })
+    .catch(() => {
+      data.categories = data.categories.filter(c => c.id !== id);
+      data.posts.forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
+      saveData(data);
+      renderCategoriesAdmin();
+      toast('API lỗi hoặc category đang được dùng');
+    });
 }
 
 /* =================== SUBSCRIBERS =================== */
