@@ -737,6 +737,7 @@ async function checkAdminSession(showToastMsg = false) {
     const res = await fetch('/api/admin/users', { credentials: 'include' });
     isLoggedIn = res.ok;
     if (isLoggedIn) {
+      await syncPostsFromApi();
       showApp();
       if (showToastMsg) toast('Xác thực admin thành công');
     } else {
@@ -769,6 +770,93 @@ function showApp() {
 function showLogin() {
   $('#loginView').style.display = 'block';
   $('#adminApp').style.display = 'none';
+}
+
+async function ensureCsrfToken() {
+  try {
+    await fetch('/api/csrf', { credentials: 'include' });
+  } catch {}
+}
+
+function getCsrfToken() {
+  return document.cookie
+    .split('; ')
+    .find((x) => x.startsWith('blogmmo_csrf='))
+    ?.split('=')[1] || '';
+}
+
+async function syncPostsFromApi() {
+  try {
+    const res = await fetch('/api/posts', { credentials: 'include' });
+    if (!res.ok) return;
+    const rows = await res.json();
+    const data = loadData();
+    data.posts = (Array.isArray(rows) ? rows : []).map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      excerpt: p.excerpt || '',
+      content: p.content || '',
+      status: p.published ? 'published' : 'draft',
+      featured: false,
+      mood: p.mood || '📝',
+      tags: Array.isArray(p.tags) ? p.tags.map((t) => t.name).filter(Boolean) : [],
+      categoryId: data.categories?.[0]?.id || '',
+      date: p.publishedAt ? String(p.publishedAt).slice(0, 10) : String(p.createdAt || new Date().toISOString()).slice(0, 10),
+      readTime: readingTime(p.content || ''),
+      cover: 'linear-gradient(135deg, #8b7355, #3d2817)',
+      coverImage: '',
+      signature: '',
+      dropCap: false,
+      views: Number(p.views || 0),
+      seoTitle: p.title,
+      seoDesc: p.excerpt || '',
+    }));
+    saveData(data);
+  } catch {}
+}
+
+async function saveCurrentPostToApi(post) {
+  await ensureCsrfToken();
+  const csrf = getCsrfToken();
+  const payload = {
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt,
+    content: post.content,
+    published: post.status === 'published',
+  };
+
+  const isNew = String(post.id || '').startsWith('p');
+  const url = isNew ? '/api/posts' : `/api/posts/${post.id}`;
+  const method = isNew ? 'POST' : 'PATCH';
+
+  const res = await fetch(url, {
+    method,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-csrf-token': csrf,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    throw new Error(t || 'Save post failed');
+  }
+  return res.json();
+}
+
+async function deletePostOnApi(id) {
+  if (!id || String(id).startsWith('p')) return;
+  await ensureCsrfToken();
+  const csrf = getCsrfToken();
+  await fetch(`/api/posts/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: { 'x-csrf-token': csrf },
+  });
 }
 
 /* =================== STATE =================== */
@@ -947,6 +1035,7 @@ function renderPostsList() {
 
 function confirmDelete(id) {
   showConfirm('Xoá bài viết?', 'Bài viết sẽ bị xoá vĩnh viễn, không thể khôi phục.', () => {
+    deletePostOnApi(id).catch(() => {});
     const data = loadData();
     data.posts = data.posts.filter(p => p.id !== id);
     saveData(data);
@@ -1053,7 +1142,7 @@ function autoSave() {
   saveTimer = setTimeout(() => { savePost(); $('#editorSaveStatus').textContent = '✓ Đã lưu'; }, 700);
 }
 
-function savePost() {
+async function savePost() {
   const data = loadData();
   const p = data.posts.find(x => x.id === state.editingPostId);
   if (!p) return;
@@ -1072,22 +1161,36 @@ function savePost() {
   p.excerpt = $('#editorSeoDesc').value || (p.content.replace(/<[^>]+>/g,' ').slice(0,160));
   p.readTime = readingTime(p.content);
   saveData(data);
+
+  try {
+    const saved = await saveCurrentPostToApi(p);
+    if (saved?.id && String(p.id).startsWith('p')) {
+      p.id = saved.id;
+      state.editingPostId = saved.id;
+      location.hash = '#/editor/' + saved.id;
+    }
+    await syncPostsFromApi();
+  } catch (e) {
+    console.error(e);
+    toast('Lưu API lỗi, đang giữ bản local');
+  }
 }
 
-function publishPost() {
+async function publishPost() {
   $('#editorStatus').value = 'published';
-  savePost();
+  await savePost();
   toast('🎉 Đã xuất bản!');
 }
 
-function previewPost() {
-  savePost();
+async function previewPost() {
+  await savePost();
   const p = loadData().posts.find(x => x.id === state.editingPostId);
   window.open('index.html#/post/' + p.slug, '_blank');
 }
 
 function deletePost() {
   showConfirm('Xoá bài viết?', 'Bài sẽ bị xoá vĩnh viễn.', () => {
+    deletePostOnApi(state.editingPostId).catch(() => {});
     const data = loadData();
     data.posts = data.posts.filter(p => p.id !== state.editingPostId);
     saveData(data);
