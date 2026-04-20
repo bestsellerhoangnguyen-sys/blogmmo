@@ -16,4 +16,5 @@ Hiển thị lịch sử thao tác admin trực tiếp trong web UI để dễ a
 - [x] API + logging write (`/api/admin/audit-logs` + DB-backed `logAdminAudit`)
 - [x] Admin UI account management panel (users list + role update)
 - [x] Account self-service password change (`/api/account/password` + `/account` UI)
+- [x] Permissions tab + snapshot export (JSON/Markdown)
 - [x] Verify + deploy + report

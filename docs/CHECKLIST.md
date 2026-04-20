@@ -65,5 +65,5 @@
 
 ## Next Focus
 - Continue security hardening backlog P1/P2 (`docs/HARDENING_BACKLOG.md`).
-- Add audit log + observability for admin actions.
 - Expand e2e regression for account/admin workflow.
+- Optional: disable `claim-admin` bootstrap once primary admin is finalized.
