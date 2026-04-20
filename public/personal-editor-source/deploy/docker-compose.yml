@@ -1,0 +1,27 @@
+version: '3.8'
+
+# Deploy blog-editor bằng Docker + Nginx Alpine (nhẹ ~20MB)
+# Cách dùng:
+#   1. Copy file này lên VPS cùng với thư mục blog-editor/
+#   2. Di chuyển nó ra cùng cấp với index.html:
+#        mv deploy/docker-compose.yml .
+#   3. Chạy: docker compose up -d
+#   4. Truy cập: http://your-vps-ip:8080
+#
+# Dừng:    docker compose down
+# Xem log: docker compose logs -f
+
+services:
+  blog-editor:
+    image: nginx:alpine
+    container_name: blog-editor
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/usr/share/nginx/html:ro
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

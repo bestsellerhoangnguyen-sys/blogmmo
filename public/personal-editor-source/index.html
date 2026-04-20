@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nhật ký — Blog Editor Cá nhân</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fafaf7;
+    --bg-2: #f3f1ea;
+    --fg: #2a2a2a;
+    --fg-muted: #6b6b6b;
+    --border: #e7e3d9;
+    --accent: #c2410c;
+    --accent-soft: #fde7d7;
+    --card: #ffffff;
+  }
+  html.dark {
+    --bg: #1a1a1a;
+    --bg-2: #242424;
+    --fg: #e8e6e0;
+    --fg-muted: #9a9a9a;
+    --border: #333;
+    --accent: #f59e0b;
+    --accent-soft: #3a2a14;
+    --card: #222;
+  }
+  html.sepia {
+    --bg: #f4ecd8;
+    --bg-2: #ead8b8;
+    --fg: #433422;
+    --fg-muted: #806a4d;
+    --border: #d9c6a0;
+    --accent: #8b4513;
+    --accent-soft: #e7d1a8;
+    --card: #faf2de;
+  }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', sans-serif;
+    transition: background .3s, color .3s;
+  }
+  .font-serif-blog { font-family: 'Lora', serif; }
+  .font-sans-blog  { font-family: 'Inter', sans-serif; }
+  .font-mono-blog  { font-family: 'JetBrains Mono', monospace; }
+  .font-merri      { font-family: 'Merriweather', serif; }
+
+  /* Editor content typography */
+  .editor-content {
+    font-size: 19px;
+    line-height: 1.75;
+    color: var(--fg);
+    outline: none;
+    min-height: 60vh;
+  }
+  .editor-content h1 { font-size: 2.25rem; font-weight: 700; margin: 1.5rem 0 1rem; line-height:1.2; }
+  .editor-content h2 { font-size: 1.6rem; font-weight: 700; margin: 1.4rem 0 .8rem; line-height:1.3; }
+  .editor-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1.2rem 0 .6rem; }
+  .editor-content p  { margin: .8rem 0; }
+  .editor-content blockquote {
+    border-left: 3px solid var(--accent);
+    padding: .3rem 1rem;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin: 1rem 0;
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+  }
+  .editor-content ul, .editor-content ol { margin: .8rem 0 .8rem 1.5rem; }
+  .editor-content ul { list-style: disc; }
+  .editor-content ol { list-style: decimal; }
+  .editor-content code {
+    background: var(--bg-2);
+    padding: 2px 6px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .9em;
+  }
+  .editor-content pre {
+    background: var(--bg-2);
+    padding: 1rem; border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .9em;
+    margin: 1rem 0;
+  }
+  .editor-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .editor-content img { max-width: 100%; border-radius: 10px; margin: 1rem 0; }
+  .editor-content hr  { border: 0; border-top: 1px solid var(--border); margin: 2rem 0; }
+  .editor-content .callout {
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    padding: .8rem 1rem; border-radius: 8px; margin: 1rem 0;
+  }
+  .drop-cap::first-letter {
+    font-family: 'Merriweather', serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    float: left;
+    line-height: 1;
+    padding: .3rem .6rem 0 0;
+    color: var(--accent);
+  }
+  /* Placeholder */
+  .editor-content[data-empty="true"]::before {
+    content: attr(data-placeholder);
+    color: var(--fg-muted);
+    pointer-events: none;
+    position: absolute;
+  }
+
+  /* Sidebar */
+  .sidebar { background: var(--bg-2); border-right: 1px solid var(--border); }
+  .post-item:hover { background: var(--bg); }
+  .post-item.active { background: var(--card); border-left: 3px solid var(--accent); }
+
+  /* Buttons */
+  .btn { padding: .5rem 1rem; border-radius: 8px; font-weight: 500; transition: all .2s; font-size: .9rem; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { opacity: .9; }
+  .btn-ghost { color: var(--fg-muted); }
+  .btn-ghost:hover { background: var(--bg-2); color: var(--fg); }
+
+  /* Floating toolbar */
+  .floating-toolbar {
+    position: absolute; display: none;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    padding: 4px; z-index: 50;
+  }
+  .floating-toolbar button {
+    width: 32px; height: 32px; border-radius: 6px;
+    color: var(--fg); display:inline-flex; align-items:center; justify-content:center;
+  }
+  .floating-toolbar button:hover { background: var(--bg-2); }
+
+  /* Slash menu */
+  .slash-menu {
+    position: absolute; display: none;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; box-shadow: 0 12px 32px rgba(0,0,0,.15);
+    width: 260px; z-index: 50; overflow:hidden;
+  }
+  .slash-item { padding: .6rem .8rem; cursor: pointer; display:flex; gap:.7rem; align-items:center; }
+  .slash-item:hover, .slash-item.active { background: var(--bg-2); }
+  .slash-icon {
+    width: 32px; height:32px; border-radius:6px;
+    background: var(--bg); display:flex; align-items:center; justify-content:center;
+    border: 1px solid var(--border);
+  }
+
+  /* Right panel */
+  .right-panel {
+    background: var(--card); border-left: 1px solid var(--border);
+    transition: transform .3s;
+  }
+  .right-panel.hidden-panel { transform: translateX(100%); }
+
+  /* Focus mode */
+  body.focus-mode .sidebar,
+  body.focus-mode header,
+  body.focus-mode .right-panel,
+  body.focus-mode .bottom-bar { opacity: 0; pointer-events: none; transition: opacity .3s; }
+  body.focus-mode .editor-wrap { padding-top: 4rem; }
+  body.focus-mode:hover header { opacity: 1; pointer-events: auto; }
+
+  /* Zen mode */
+  body.zen-mode .sidebar,
+  body.zen-mode header,
+  body.zen-mode .right-panel,
+  body.zen-mode .bottom-bar,
+  body.zen-mode .editor-toolbar { display: none !important; }
+
+  /* Typewriter mode — dim non-current paragraphs */
+  .typewriter .editor-content > *:not(.current-block) { opacity: .3; transition: opacity .2s; }
+
+  /* Inputs */
+  .input {
+    background: var(--bg-2); border: 1px solid var(--border);
+    color: var(--fg); padding: .5rem .75rem; border-radius: 8px;
+    font-size: .9rem; width: 100%;
+  }
+  .input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* Tag chips */
+  .chip {
+    display:inline-flex; align-items:center; gap:.3rem;
+    padding: .2rem .6rem; border-radius: 999px;
+    background: var(--bg-2); font-size: .75rem; color: var(--fg-muted);
+    border: 1px solid var(--border);
+  }
+  .chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--fg); color: var(--bg); padding: .6rem 1.2rem;
+    border-radius: 999px; font-size: .85rem; z-index: 100;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+    opacity: 0; transition: opacity .3s, transform .3s;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.4);
+    display: none; align-items: center; justify-content: center; z-index: 80;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--card); border-radius: 12px; padding: 1.5rem;
+    max-width: 520px; width: 90%; max-height: 80vh; overflow-y: auto;
+  }
+
+  /* Cover image placeholder */
+  .cover-ph {
+    background: linear-gradient(135deg, var(--accent-soft), var(--bg-2));
+    border: 1px dashed var(--border);
+  }
+
+  /* Writing goal progress */
+  .goal-bar {
+    height: 4px; background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+  .goal-bar > div {
+    height: 100%; background: var(--accent); transition: width .3s;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .sidebar { position: fixed; left: 0; top: 0; bottom: 0; width: 280px; z-index: 60; transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .right-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 320px; z-index: 60; }
+  }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 flex items-center justify-between px-4 md:px-6 py-3 border-b" style="border-color: var(--border); background: var(--bg); backdrop-filter: blur(10px);">
+  <div class="flex items-center gap-3">
+    <button id="toggleSidebar" class="btn btn-ghost md:hidden" title="Menu">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold" style="background: var(--accent);">N</div>
+      <div>
+        <div class="font-merri font-bold text-lg leading-none">Nhật ký</div>
+        <div class="text-xs" style="color: var(--fg-muted);">Blog cá nhân của Anh Hoàng</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    <span id="saveStatus" class="text-xs mr-2 hidden md:inline" style="color: var(--fg-muted);">Đã lưu</span>
+
+    <button id="focusBtn" class="btn btn-ghost" title="Focus mode (F)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M3 12h3M18 12h3M12 3v3M12 18v3"/></svg>
+    </button>
+    <button id="zenBtn" class="btn btn-ghost" title="Zen mode (Z)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12c4-8 12-8 16 0-4 8-12 8-16 0z"/><circle cx="12" cy="12" r="2"/></svg>
+    </button>
+    <button id="themeBtn" class="btn btn-ghost" title="Đổi giao diện">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+    <button id="settingsBtn" class="btn btn-ghost" title="Cài đặt bài viết">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button id="previewBtn" class="btn btn-ghost hidden md:inline-flex">Xem trước</button>
+    <button id="publishBtn" class="btn btn-primary">Xuất bản</button>
+  </div>
+</header>
+
+<!-- MAIN LAYOUT -->
+<div class="flex" style="height: calc(100vh - 64px);">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-72 flex-shrink-0 flex flex-col">
+    <div class="p-4 border-b" style="border-color: var(--border);">
+      <button id="newPostBtn" class="btn btn-primary w-full flex items-center justify-center gap-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Bài viết mới
+      </button>
+      <input id="searchInput" class="input mt-3" placeholder="🔍 Tìm bài viết..." />
+    </div>
+
+    <div class="px-3 py-2">
+      <div class="text-xs font-medium mb-1" style="color: var(--fg-muted);">THƯ MỤC</div>
+      <div id="folders" class="space-y-1"></div>
+    </div>
+
+    <div class="px-3 py-2">
+      <div class="text-xs font-medium mb-2" style="color: var(--fg-muted);">TAG</div>
+      <div id="tags" class="flex flex-wrap gap-1"></div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-1 py-2">
+      <div class="text-xs font-medium px-3 mb-1" style="color: var(--fg-muted);">BÀI VIẾT</div>
+      <div id="postList"></div>
+    </div>
+
+    <!-- Streak + Goal -->
+    <div class="p-3 border-t" style="border-color: var(--border);">
+      <div class="flex items-center justify-between text-xs mb-2">
+        <span style="color: var(--fg-muted);">🔥 Streak</span>
+        <span class="font-bold"><span id="streak">7</span> ngày</span>
+      </div>
+      <div class="flex items-center justify-between text-xs mb-1">
+        <span style="color: var(--fg-muted);">🎯 Mục tiêu hôm nay</span>
+        <span><span id="goalCurrent">0</span>/<span id="goalTarget">500</span> từ</span>
+      </div>
+      <div class="goal-bar"><div id="goalBar" style="width: 0%"></div></div>
+    </div>
+  </aside>
+
+  <!-- EDITOR AREA -->
+  <main class="flex-1 overflow-y-auto relative editor-wrap">
+    <!-- Editor toolbar (top hint) -->
+    <div class="editor-toolbar sticky top-0 z-10 px-4 md:px-8 py-2 flex items-center justify-between text-xs" style="background: var(--bg); border-bottom: 1px solid var(--border); color: var(--fg-muted);">
+      <div class="flex items-center gap-3">
+        <span>Gõ <kbd class="px-1.5 py-0.5 rounded" style="background: var(--bg-2);">/</kbd> để chèn block</span>
+        <span class="hidden md:inline">• Bôi đen để định dạng</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <select id="fontSelect" class="input text-xs" style="width: auto; padding: .25rem .5rem;">
+          <option value="font-serif-blog">Serif (Lora)</option>
+          <option value="font-sans-blog">Sans (Inter)</option>
+          <option value="font-merri">Serif (Merriweather)</option>
+          <option value="font-mono-blog">Mono</option>
+        </select>
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" id="dropCapToggle" />
+          <span>Drop cap</span>
+        </label>
+        <label class="flex items-center gap-1 cursor-pointer">
+          <input type="checkbox" id="typewriterToggle" />
+          <span>Typewriter</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Daily prompt -->
+    <div id="dailyPrompt" class="mx-auto max-w-[720px] mt-6 px-4 md:px-0">
+      <div class="rounded-lg p-4 flex items-start gap-3" style="background: var(--accent-soft); border: 1px solid var(--border);">
+        <div class="text-2xl">✨</div>
+        <div class="flex-1">
+          <div class="text-xs font-medium mb-1" style="color: var(--accent);">GỢI Ý HÔM NAY</div>
+          <div id="promptText" class="text-sm font-merri">Hôm nay bạn đã gặp một điều gì khiến mình mỉm cười?</div>
+        </div>
+        <button id="newPrompt" class="btn btn-ghost text-xs">🔄</button>
+        <button id="closePrompt" class="btn btn-ghost text-xs">✕</button>
+      </div>
+    </div>
+
+    <!-- Cover + Title + Editor -->
+    <div class="mx-auto max-w-[720px] px-4 md:px-0 py-8">
+      <div id="coverArea" class="cover-ph rounded-xl h-48 flex items-center justify-center cursor-pointer mb-6 text-sm" style="color: var(--fg-muted);">
+        <div class="text-center">
+          <div class="text-3xl mb-1">🌄</div>
+          <div>Thêm ảnh bìa</div>
+        </div>
+      </div>
+
+      <input id="titleInput" placeholder="Tiêu đề bài viết..." class="w-full font-merri font-bold text-4xl md:text-5xl leading-tight mb-3 bg-transparent outline-none" style="color: var(--fg);" />
+
+      <div class="flex items-center gap-2 mb-6 text-sm flex-wrap" style="color: var(--fg-muted);">
+        <span id="dateLabel">20/04/2026</span>
+        <span>•</span>
+        <span id="moodLabel" class="cursor-pointer hover:underline">😌 Thêm cảm xúc</span>
+        <span>•</span>
+        <span><span id="readTime">0</span> phút đọc</span>
+      </div>
+
+      <div id="editor" class="editor-content font-serif-blog relative" contenteditable="true" data-placeholder="Bắt đầu viết, hoặc gõ / để chèn block..." data-empty="true"></div>
+    </div>
+
+    <!-- Floating toolbar -->
+    <div id="floatingToolbar" class="floating-toolbar">
+      <button data-cmd="bold" title="Đậm (Ctrl+B)"><b>B</b></button>
+      <button data-cmd="italic" title="Nghiêng (Ctrl+I)"><i>I</i></button>
+      <button data-cmd="underline" title="Gạch chân"><u>U</u></button>
+      <button data-cmd="strikeThrough" title="Gạch ngang"><s>S</s></button>
+      <button data-cmd="h1" title="Heading 1">H1</button>
+      <button data-cmd="h2" title="Heading 2">H2</button>
+      <button data-cmd="quote" title="Trích dẫn">❝</button>
+      <button data-cmd="code" title="Code">&lt;/&gt;</button>
+      <button data-cmd="link" title="Liên kết">🔗</button>
+    </div>
+
+    <!-- Slash menu -->
+    <div id="slashMenu" class="slash-menu"></div>
+  </main>
+
+  <!-- RIGHT PANEL (Post settings) -->
+  <aside id="rightPanel" class="right-panel w-80 hidden-panel md:block flex-shrink-0 overflow-y-auto">
+    <div class="p-4">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold">Cài đặt bài viết</h3>
+        <button id="closePanel" class="btn btn-ghost md:hidden">✕</button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color: var(--fg-muted);">Trạng thái</label>
+          <select id="statusSelect" class="input">
+            <option value="draft">Nháp</option>
+            <option value="published">Đã đăng</option>
+            <option value="archived">Lưu trữ</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color: var(--fg-muted);">Slug URL</label>
+          <input id="slugInput" class="input font-mono-blog text-xs" placeholder="vi-du-slug" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color: var(--fg-muted);">Tag (phân tách bằng dấu phẩy)</label>
+          <input id="tagInput" class="input" placeholder="đời sống, suy ngẫm" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color: var(--fg-muted);">Cảm xúc bài viết</label>
+          <div id="moodPicker" class="flex flex-wrap gap-1"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium mb-1" style="color: var(--fg-muted);">Lịch đăng</label>
+          <input id="scheduleInput" type="datetime-local" class="input" />
+        </div>
+
+        <div class="pt-2 border-t" style="border-color: var(--border);">
+          <div class="text-xs font-medium mb-2" style="color: var(--fg-muted);">SEO</div>
+          <input id="seoTitle" class="input mb-2" placeholder="SEO Title" />
+          <textarea id="seoDesc" class="input" rows="3" placeholder="Meta description..."></textarea>
+        </div>
+
+        <div class="pt-2 border-t" style="border-color: var(--border);">
+          <div class="text-xs font-medium mb-2" style="color: var(--fg-muted);">Xuất bài</div>
+          <div class="flex flex-wrap gap-2">
+            <button id="exportMd" class="btn btn-ghost text-xs" style="border:1px solid var(--border);">📄 Markdown</button>
+            <button id="exportHtml" class="btn btn-ghost text-xs" style="border:1px solid var(--border);">🌐 HTML</button>
+            <button id="copyLink" class="btn btn-ghost text-xs" style="border:1px solid var(--border);">🔗 Copy link</button>
+          </div>
+        </div>
+
+        <div class="pt-2 border-t" style="border-color: var(--border);">
+          <div class="text-xs font-medium mb-2" style="color: var(--fg-muted);">Chữ ký cuối bài</div>
+          <input id="signatureInput" class="input text-xs" placeholder="Viết tại Đà Lạt, chiều mưa…" />
+        </div>
+
+        <button id="deletePostBtn" class="btn w-full text-xs mt-4" style="border:1px solid var(--border); color: #dc2626;">🗑 Xoá bài viết</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- BOTTOM STATUS BAR -->
+<div class="bottom-bar fixed bottom-0 left-0 right-0 flex items-center justify-center gap-4 text-xs px-4 py-1.5 pointer-events-none" style="color: var(--fg-muted);">
+  <span>📝 <span id="wordCount">0</span> từ</span>
+  <span>•</span>
+  <span>🔤 <span id="charCount">0</span> ký tự</span>
+  <span>•</span>
+  <span>⏱ <span id="readTime2">0</span> phút đọc</span>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast">Đã lưu</div>
+
+<!-- Preview Modal -->
+<div id="previewModal" class="modal-bg">
+  <div class="modal font-serif-blog" style="max-width: 720px;">
+    <div class="flex justify-between items-center mb-4">
+      <div class="text-xs font-sans-blog" style="color: var(--fg-muted);">XEM TRƯỚC</div>
+      <button id="closePreview" class="btn btn-ghost">✕</button>
+    </div>
+    <div id="previewContent"></div>
+  </div>
+</div>
+
+<!-- Shortcuts Modal -->
+<div id="shortcutsModal" class="modal-bg">
+  <div class="modal">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="font-semibold">⌨️ Phím tắt</h3>
+      <button id="closeShortcuts" class="btn btn-ghost">✕</button>
+    </div>
+    <div class="space-y-2 text-sm">
+      <div class="flex justify-between"><span>Lưu nháp</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+S</kbd></div>
+      <div class="flex justify-between"><span>Focus mode</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+Shift+F</kbd></div>
+      <div class="flex justify-between"><span>Zen mode</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+Shift+Z</kbd></div>
+      <div class="flex justify-between"><span>Xem trước</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+Shift+P</kbd></div>
+      <div class="flex justify-between"><span>Chèn block</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">/</kbd></div>
+      <div class="flex justify-between"><span>Đậm / Nghiêng</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+B / I</kbd></div>
+      <div class="flex justify-between"><span>Xem phím tắt</span><kbd class="px-2 py-0.5 rounded" style="background: var(--bg-2);">Ctrl+/</kbd></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =================== DATA =================== */
+const MOODS = [
+  {e:'😌', n:'Bình yên'}, {e:'😊', n:'Vui vẻ'}, {e:'🥲', n:'Xúc động'},
+  {e:'🤔', n:'Suy tư'}, {e:'💭', n:'Hoài niệm'}, {e:'🔥', n:'Hào hứng'},
+  {e:'😢', n:'Buồn'}, {e:'☕', n:'Thư giãn'}, {e:'🌧', n:'Man mác'},
+];
+
+const PROMPTS = [
+  'Hôm nay bạn đã gặp một điều gì khiến mình mỉm cười?',
+  'Nếu có thể gửi một lá thư cho chính mình 5 năm trước, bạn sẽ viết gì?',
+  'Một ký ức nhỏ nhưng in sâu trong lòng bạn tuần qua là gì?',
+  'Điều gì bạn biết ơn vào sáng nay?',
+  'Mô tả một nơi chốn khiến bạn cảm thấy là chính mình.',
+  'Bài hát nào đang vang trong đầu bạn lúc này, và vì sao?',
+  'Điều nhỏ nhặt nào hôm nay đáng được ghi lại?',
+];
+
+const DEMO_POSTS = [
+  {
+    id: 'p1',
+    title: 'Chiều mưa Đà Lạt và ly cà phê muộn',
+    slug: 'chieu-mua-da-lat',
+    status: 'published',
+    mood: '🌧',
+    tags: ['du lịch', 'đời sống'],
+    date: '2026-04-18',
+    cover: '',
+    signature: 'Viết tại Đà Lạt, một chiều mưa lất phất.',
+    dropCap: true,
+    content: `<p>Đà Lạt hôm nay mưa từ trưa. Tôi ngồi trong một quán nhỏ bên hông dốc, nhìn những giọt nước chạy dài trên khung kính, và nghĩ về những điều rất cũ.</p>
+<p>Có lẽ thành phố này được sinh ra để buộc người ta chậm lại. Không khí ẩm, mùi thông, tiếng mưa rơi đều đều lên mái tôn — tất cả cộng lại thành một thứ âm thanh rất lạ, khiến lòng mình dịu đi.</p>
+<blockquote>"Đôi khi, hạnh phúc chỉ đơn giản là một chỗ ngồi có mái che, và một ly cà phê còn đủ ấm."</blockquote>
+<h2>Những con dốc</h2>
+<p>Tôi đi bộ rất nhiều. Những con dốc của Đà Lạt lúc nào cũng dài hơn mình tưởng, và luôn có điều gì đó ở cuối dốc khiến mình muốn bước tiếp.</p>
+<ul><li>Một tiệm sách cũ</li><li>Một hàng hoa</li><li>Một người lạ đang cười</li></ul>
+<p>Và cuối cùng, tôi luôn trở về quán quen — như một thói quen của riêng mình.</p>`
+  },
+  {
+    id: 'p2',
+    title: 'Viết cho một buổi sáng thứ Hai',
+    slug: 'viet-cho-sang-thu-hai',
+    status: 'published',
+    mood: '☕',
+    tags: ['suy ngẫm'],
+    date: '2026-04-14',
+    cover: '',
+    signature: 'Sài Gòn, 6h30 sáng.',
+    dropCap: false,
+    content: `<p>Thứ Hai không đáng sợ như người ta hay nói. Nó chỉ đến vào lúc mình chưa sẵn sàng, vậy thôi.</p>
+<p>Sáng nay tôi thử dậy sớm hơn 30 phút. Pha một ấm trà thay vì cà phê. Và mở cửa sổ.</p>
+<p>Thành phố có một thứ âm thanh rất riêng vào lúc này — khi xe chưa đông, khi những tiếng rao đầu tiên bắt đầu vang lên từ con hẻm dưới nhà.</p>`
+  },
+  {
+    id: 'p3',
+    title: 'Một năm học code và những điều tôi nhận ra',
+    slug: 'mot-nam-hoc-code',
+    status: 'draft',
+    mood: '🤔',
+    tags: ['lập trình', 'suy ngẫm'],
+    date: '2026-04-20',
+    cover: '',
+    signature: '',
+    dropCap: false,
+    content: `<h2>Bắt đầu từ đâu?</h2><p>Tôi bắt đầu với một cuốn sách và một ly cà phê. Đó là cách khởi đầu nào cũng sẽ có...</p>`
+  },
+  {
+    id: 'p4',
+    title: 'Danh sách những cuốn sách tháng Tư',
+    slug: 'sach-thang-tu',
+    status: 'published',
+    mood: '💭',
+    tags: ['sách'],
+    date: '2026-04-10',
+    cover: '',
+    signature: '',
+    dropCap: false,
+    content: `<p>Tháng Tư đọc được 3 cuốn, ngắn thôi nhưng đủ đầy.</p><ol><li>Norwegian Wood — Haruki Murakami</li><li>Man's Search for Meaning — Viktor Frankl</li><li>Thinking, Fast and Slow — Daniel Kahneman</li></ol>`
+  },
+  {
+    id: 'p5',
+    title: '(Nháp) Ý tưởng cho dự án nhỏ',
+    slug: 'y-tuong-du-an',
+    status: 'draft',
+    mood: '🔥',
+    tags: ['lập trình'],
+    date: '2026-04-19',
+    cover: '',
+    signature: '',
+    dropCap: false,
+    content: `<p>Một vài ý tưởng đang nhen nhóm...</p><ul><li>App ghi chú kiểu nhật ký</li><li>Blog engine viết bằng tay</li></ul>`
+  },
+];
+
+/* =================== STATE =================== */
+let state = {
+  posts: JSON.parse(JSON.stringify(DEMO_POSTS)),
+  currentId: 'p1',
+  filter: { folder: 'all', tag: null, q: '' },
+  theme: 'light',
+  goalTarget: 500,
+  streak: 7,
+};
+
+/* =================== HELPERS =================== */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+const currentPost = () => state.posts.find(p => p.id === state.currentId);
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+function countWords(html) {
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!text) return { words: 0, chars: 0 };
+  const words = text.split(/\s+/).length;
+  return { words, chars: text.length };
+}
+
+/* =================== RENDERING =================== */
+function renderFolders() {
+  const counts = {
+    all: state.posts.length,
+    draft: state.posts.filter(p => p.status==='draft').length,
+    published: state.posts.filter(p => p.status==='published').length,
+    archived: state.posts.filter(p => p.status==='archived').length,
+  };
+  const folders = [
+    { id: 'all', label: '📚 Tất cả', count: counts.all },
+    { id: 'draft', label: '📝 Nháp', count: counts.draft },
+    { id: 'published', label: '✨ Đã đăng', count: counts.published },
+    { id: 'archived', label: '🗄 Lưu trữ', count: counts.archived },
+  ];
+  $('#folders').innerHTML = folders.map(f => `
+    <div class="post-item flex items-center justify-between px-3 py-1.5 rounded-md cursor-pointer text-sm ${state.filter.folder===f.id?'active':''}" data-folder="${f.id}">
+      <span>${f.label}</span>
+      <span class="text-xs" style="color: var(--fg-muted);">${f.count}</span>
+    </div>
+  `).join('');
+  $$('#folders [data-folder]').forEach(el => {
+    el.addEventListener('click', () => { state.filter.folder = el.dataset.folder; renderAll(); });
+  });
+}
+
+function renderTags() {
+  const allTags = [...new Set(state.posts.flatMap(p => p.tags))];
+  $('#tags').innerHTML = allTags.map(t => `
+    <span class="chip cursor-pointer ${state.filter.tag===t?'active':''}" data-tag="${t}">#${t}</span>
+  `).join('') + `<span class="chip cursor-pointer ${!state.filter.tag?'active':''}" data-tag="">tất cả</span>`;
+  $$('#tags [data-tag]').forEach(el => {
+    el.addEventListener('click', () => { state.filter.tag = el.dataset.tag || null; renderAll(); });
+  });
+}
+
+function renderPostList() {
+  const q = state.filter.q.toLowerCase();
+  const filtered = state.posts.filter(p => {
+    if (state.filter.folder !== 'all' && p.status !== state.filter.folder) return false;
+    if (state.filter.tag && !p.tags.includes(state.filter.tag)) return false;
+    if (q && !(p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q))) return false;
+    return true;
+  });
+  $('#postList').innerHTML = filtered.length ? filtered.map(p => {
+    const excerpt = p.content.replace(/<[^>]+>/g,' ').slice(0, 60);
+    return `
+      <div class="post-item px-3 py-2 rounded-md cursor-pointer mx-1 ${p.id===state.currentId?'active':''}" data-id="${p.id}">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex-1 min-w-0">
+            <div class="font-medium text-sm truncate">${p.mood||''} ${p.title || '(Không tiêu đề)'}</div>
+            <div class="text-xs mt-0.5 truncate" style="color: var(--fg-muted);">${excerpt}</div>
+            <div class="text-xs mt-1" style="color: var(--fg-muted);">${p.date} • ${p.status==='draft'?'Nháp':p.status==='published'?'Đã đăng':'Lưu trữ'}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('') : `<div class="text-center text-xs py-6" style="color: var(--fg-muted);">Không tìm thấy bài viết</div>`;
+  $$('#postList [data-id]').forEach(el => {
+    el.addEventListener('click', () => { saveCurrent(); state.currentId = el.dataset.id; renderAll(); });
+  });
+}
+
+function renderEditor() {
+  const p = currentPost();
+  if (!p) return;
+  $('#titleInput').value = p.title || '';
+  $('#editor').innerHTML = p.content || '';
+  $('#editor').dataset.empty = p.content ? 'false' : 'true';
+  $('#editor').classList.toggle('drop-cap', !!p.dropCap);
+  $('#dropCapToggle').checked = !!p.dropCap;
+  $('#slugInput').value = p.slug || '';
+  $('#tagInput').value = (p.tags||[]).join(', ');
+  $('#statusSelect').value = p.status;
+  $('#signatureInput').value = p.signature || '';
+  $('#seoTitle').value = p.seoTitle || p.title || '';
+  $('#seoDesc').value = p.seoDesc || '';
+  $('#dateLabel').textContent = new Date(p.date).toLocaleDateString('vi-VN');
+  $('#moodLabel').textContent = p.mood ? `${p.mood} ${MOODS.find(m=>m.e===p.mood)?.n||''}` : '😌 Thêm cảm xúc';
+  updateStats();
+}
+
+function renderMoodPicker() {
+  const p = currentPost();
+  $('#moodPicker').innerHTML = MOODS.map(m => `
+    <span class="chip cursor-pointer ${p&&p.mood===m.e?'active':''}" data-mood="${m.e}">${m.e} ${m.n}</span>
+  `).join('');
+  $$('#moodPicker [data-mood]').forEach(el => {
+    el.addEventListener('click', () => {
+      const p = currentPost(); if (!p) return;
+      p.mood = p.mood === el.dataset.mood ? '' : el.dataset.mood;
+      renderAll();
+    });
+  });
+}
+
+function renderAll() {
+  renderFolders(); renderTags(); renderPostList();
+  renderEditor(); renderMoodPicker();
+}
+
+/* =================== STATS =================== */
+function updateStats() {
+  const html = $('#editor').innerHTML;
+  const { words, chars } = countWords(html);
+  const mins = Math.max(1, Math.round(words / 200));
+  $('#wordCount').textContent = words;
+  $('#charCount').textContent = chars;
+  $('#readTime').textContent = mins;
+  $('#readTime2').textContent = mins;
+  $('#goalCurrent').textContent = words;
+  $('#goalTarget').textContent = state.goalTarget;
+  const pct = Math.min(100, (words / state.goalTarget) * 100);
+  $('#goalBar').style.width = pct + '%';
+}
+
+/* =================== SAVE =================== */
+function saveCurrent() {
+  const p = currentPost(); if (!p) return;
+  p.title = $('#titleInput').value;
+  p.content = $('#editor').innerHTML;
+  p.slug = $('#slugInput').value;
+  p.tags = $('#tagInput').value.split(',').map(s=>s.trim()).filter(Boolean);
+  p.status = $('#statusSelect').value;
+  p.signature = $('#signatureInput').value;
+  p.seoTitle = $('#seoTitle').value;
+  p.seoDesc = $('#seoDesc').value;
+  p.dropCap = $('#dropCapToggle').checked;
+  $('#saveStatus').textContent = 'Đã lưu';
+}
+
+let saveTimer = null;
+function autoSave() {
+  $('#saveStatus').textContent = 'Đang lưu...';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    saveCurrent();
+    renderPostList();
+  }, 600);
+}
+
+/* =================== EDITOR EVENTS =================== */
+const editor = $('#editor');
+
+editor.addEventListener('input', () => {
+  editor.dataset.empty = editor.textContent.trim() ? 'false' : 'true';
+  updateStats();
+  autoSave();
+});
+
+$('#titleInput').addEventListener('input', () => {
+  const t = $('#titleInput').value;
+  $('#slugInput').value = t.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/đ/g,'d').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  autoSave();
+});
+
+['slugInput','tagInput','statusSelect','signatureInput','seoTitle','seoDesc'].forEach(id => {
+  $('#'+id).addEventListener('input', autoSave);
+  $('#'+id).addEventListener('change', autoSave);
+});
+
+/* =================== FLOATING TOOLBAR =================== */
+const fToolbar = $('#floatingToolbar');
+document.addEventListener('selectionchange', () => {
+  const sel = window.getSelection();
+  if (!sel || sel.rangeCount === 0 || sel.isCollapsed) { fToolbar.style.display = 'none'; return; }
+  const range = sel.getRangeAt(0);
+  if (!editor.contains(range.commonAncestorContainer)) { fToolbar.style.display = 'none'; return; }
+  const rect = range.getBoundingClientRect();
+  if (rect.width === 0) { fToolbar.style.display = 'none'; return; }
+  fToolbar.style.display = 'block';
+  fToolbar.style.top = (window.scrollY + rect.top - 48) + 'px';
+  fToolbar.style.left = (rect.left + rect.width/2 - fToolbar.offsetWidth/2) + 'px';
+});
+
+fToolbar.addEventListener('mousedown', (e) => { e.preventDefault(); });
+fToolbar.addEventListener('click', (e) => {
+  const btn = e.target.closest('button'); if (!btn) return;
+  const cmd = btn.dataset.cmd;
+  if (['bold','italic','underline','strikeThrough'].includes(cmd)) {
+    document.execCommand(cmd, false, null);
+  } else if (cmd === 'h1') document.execCommand('formatBlock', false, 'H1');
+  else if (cmd === 'h2') document.execCommand('formatBlock', false, 'H2');
+  else if (cmd === 'quote') document.execCommand('formatBlock', false, 'BLOCKQUOTE');
+  else if (cmd === 'code') {
+    const sel = window.getSelection().toString();
+    if (sel) document.execCommand('insertHTML', false, `<code>${sel}</code>`);
+  } else if (cmd === 'link') {
+    const url = prompt('Nhập URL:'); if (url) document.execCommand('createLink', false, url);
+  }
+  updateStats(); autoSave();
+});
+
+/* =================== SLASH MENU =================== */
+const slashMenu = $('#slashMenu');
+const SLASH_ITEMS = [
+  { icon: 'H1', label: 'Heading 1', desc: 'Tiêu đề lớn', action: () => document.execCommand('formatBlock', false, 'H1') },
+  { icon: 'H2', label: 'Heading 2', desc: 'Tiêu đề phụ', action: () => document.execCommand('formatBlock', false, 'H2') },
+  { icon: 'H3', label: 'Heading 3', desc: 'Tiêu đề nhỏ', action: () => document.execCommand('formatBlock', false, 'H3') },
+  { icon: '❝', label: 'Trích dẫn', desc: 'Khối quote', action: () => document.execCommand('formatBlock', false, 'BLOCKQUOTE') },
+  { icon: '•', label: 'Danh sách', desc: 'Bullet list', action: () => document.execCommand('insertUnorderedList') },
+  { icon: '1.', label: 'Danh sách số', desc: 'Numbered list', action: () => document.execCommand('insertOrderedList') },
+  { icon: '☐', label: 'Checklist', desc: 'Task list', action: () => document.execCommand('insertHTML', false, '<ul><li>☐ </li></ul>') },
+  { icon: '</>', label: 'Code block', desc: 'Khối code', action: () => document.execCommand('insertHTML', false, '<pre><code>// code...</code></pre>') },
+  { icon: '—', label: 'Divider', desc: 'Đường phân cách', action: () => document.execCommand('insertHorizontalRule') },
+  { icon: '💡', label: 'Callout', desc: 'Hộp nhấn mạnh', action: () => document.execCommand('insertHTML', false, '<div class="callout">💡 Viết gì đó ở đây...</div><p></p>') },
+  { icon: '🖼', label: 'Ảnh', desc: 'Chèn ảnh từ URL', action: () => { const u = prompt('URL ảnh:'); if (u) document.execCommand('insertHTML', false, `<img src="${u}" alt=""/>`); } },
+  { icon: '▶', label: 'YouTube', desc: 'Nhúng YouTube', action: () => { const u = prompt('URL YouTube:'); if (u) { const id = u.match(/(?:v=|youtu\.be\/)([\w-]+)/)?.[1]; if (id) document.execCommand('insertHTML', false, `<iframe width="100%" height="360" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen></iframe><p></p>`); } } },
+];
+
+let slashActive = 0;
+let slashQuery = '';
+function showSlashMenu(query='') {
+  slashQuery = query.toLowerCase();
+  const items = SLASH_ITEMS.filter(i => i.label.toLowerCase().includes(slashQuery) || i.desc.toLowerCase().includes(slashQuery));
+  if (!items.length) { slashMenu.style.display = 'none'; return; }
+  slashActive = 0;
+  slashMenu.innerHTML = items.map((it, i) => `
+    <div class="slash-item ${i===0?'active':''}" data-idx="${i}">
+      <div class="slash-icon text-sm font-bold">${it.icon}</div>
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium">${it.label}</div>
+        <div class="text-xs truncate" style="color: var(--fg-muted);">${it.desc}</div>
+      </div>
+    </div>
+  `).join('');
+  slashMenu._items = items;
+  const sel = window.getSelection();
+  if (sel.rangeCount === 0) return;
+  const rect = sel.getRangeAt(0).getBoundingClientRect();
+  slashMenu.style.display = 'block';
+  slashMenu.style.top = (window.scrollY + rect.bottom + 4) + 'px';
+  slashMenu.style.left = rect.left + 'px';
+  $$('.slash-item').forEach(el => {
+    el.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      executeSlash(parseInt(el.dataset.idx));
+    });
+  });
+}
+
+function executeSlash(idx) {
+  const item = slashMenu._items?.[idx]; if (!item) return;
+  // Remove the "/query" text
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    const node = range.startContainer;
+    if (node.nodeType === 3) {
+      const text = node.textContent;
+      const slashIdx = text.lastIndexOf('/', range.startOffset-1);
+      if (slashIdx >= 0) {
+        range.setStart(node, slashIdx);
+        range.deleteContents();
+      }
+    }
+  }
+  item.action();
+  slashMenu.style.display = 'none';
+  updateStats(); autoSave();
+  editor.focus();
+}
+
+editor.addEventListener('keyup', (e) => {
+  const sel = window.getSelection();
+  if (sel.rangeCount === 0) return;
+  const node = sel.getRangeAt(0).startContainer;
+  if (node.nodeType !== 3) { slashMenu.style.display = 'none'; return; }
+  const text = node.textContent.slice(0, sel.getRangeAt(0).startOffset);
+  const match = text.match(/\/([a-zA-ZÀ-ỹ0-9]*)$/);
+  if (match) {
+    showSlashMenu(match[1]);
+  } else {
+    slashMenu.style.display = 'none';
+  }
+});
+
+editor.addEventListener('keydown', (e) => {
+  if (slashMenu.style.display !== 'block') return;
+  const items = slashMenu._items || [];
+  if (e.key === 'ArrowDown') {
+    e.preventDefault(); slashActive = (slashActive+1) % items.length;
+    $$('.slash-item').forEach((el,i) => el.classList.toggle('active', i===slashActive));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault(); slashActive = (slashActive-1+items.length) % items.length;
+    $$('.slash-item').forEach((el,i) => el.classList.toggle('active', i===slashActive));
+  } else if (e.key === 'Enter') {
+    e.preventDefault(); executeSlash(slashActive);
+  } else if (e.key === 'Escape') {
+    slashMenu.style.display = 'none';
+  }
+});
+
+/* =================== TYPEWRITER MODE =================== */
+$('#typewriterToggle').addEventListener('change', (e) => {
+  document.body.classList.toggle('typewriter', e.target.checked);
+});
+editor.addEventListener('click', highlightCurrentBlock);
+editor.addEventListener('keyup', highlightCurrentBlock);
+function highlightCurrentBlock() {
+  if (!document.body.classList.contains('typewriter')) return;
+  const sel = window.getSelection();
+  if (sel.rangeCount === 0) return;
+  let node = sel.getRangeAt(0).startContainer;
+  while (node && node.parentNode !== editor) node = node.parentNode;
+  $$('.editor-content > *').forEach(el => el.classList.remove('current-block'));
+  if (node) node.classList?.add('current-block');
+}
+
+/* =================== FONT / THEME / DROPCAP =================== */
+$('#fontSelect').addEventListener('change', (e) => {
+  editor.className = 'editor-content ' + e.target.value + ' relative';
+  if (currentPost().dropCap) editor.classList.add('drop-cap');
+});
+
+$('#dropCapToggle').addEventListener('change', (e) => {
+  editor.classList.toggle('drop-cap', e.target.checked);
+  autoSave();
+});
+
+const THEMES = ['light', 'dark', 'sepia'];
+$('#themeBtn').addEventListener('click', () => {
+  const cur = THEMES.indexOf(state.theme);
+  state.theme = THEMES[(cur+1) % THEMES.length];
+  document.documentElement.className = state.theme === 'light' ? '' : state.theme;
+  toast(`Giao diện: ${state.theme==='light'?'Sáng':state.theme==='dark'?'Tối':'Sepia (giấy cũ)'}`);
+});
+
+/* =================== FOCUS / ZEN =================== */
+$('#focusBtn').addEventListener('click', () => {
+  document.body.classList.toggle('focus-mode');
+  toast(document.body.classList.contains('focus-mode') ? 'Focus mode: bật' : 'Focus mode: tắt');
+});
+$('#zenBtn').addEventListener('click', () => {
+  document.body.classList.toggle('zen-mode');
+  toast(document.body.classList.contains('zen-mode') ? 'Zen mode: bật (ESC để thoát)' : 'Zen mode: tắt');
+});
+
+/* =================== PANEL / SIDEBAR =================== */
+$('#settingsBtn').addEventListener('click', () => {
+  $('#rightPanel').classList.toggle('hidden-panel');
+});
+$('#closePanel')?.addEventListener('click', () => $('#rightPanel').classList.add('hidden-panel'));
+$('#toggleSidebar').addEventListener('click', () => {
+  document.querySelector('.sidebar').classList.toggle('open');
+});
+
+/* =================== SEARCH =================== */
+$('#searchInput').addEventListener('input', (e) => {
+  state.filter.q = e.target.value;
+  renderPostList();
+});
+
+/* =================== MOOD CLICK =================== */
+$('#moodLabel').addEventListener('click', () => {
+  $('#rightPanel').classList.remove('hidden-panel');
+  $('#moodPicker').scrollIntoView({behavior: 'smooth'});
+});
+
+/* =================== NEW POST =================== */
+$('#newPostBtn').addEventListener('click', () => {
+  saveCurrent();
+  const id = 'p' + Date.now();
+  const today = new Date().toISOString().slice(0,10);
+  state.posts.unshift({
+    id, title: '', slug: '', status: 'draft', mood: '',
+    tags: [], date: today, cover: '', signature: '',
+    dropCap: false, content: ''
+  });
+  state.currentId = id;
+  state.filter.folder = 'all';
+  renderAll();
+  $('#titleInput').focus();
+  toast('Bài viết mới đã tạo');
+});
+
+/* =================== DELETE =================== */
+$('#deletePostBtn').addEventListener('click', () => {
+  if (!confirm('Xoá bài viết này?')) return;
+  state.posts = state.posts.filter(p => p.id !== state.currentId);
+  state.currentId = state.posts[0]?.id;
+  if (!state.currentId) {
+    $('#newPostBtn').click(); return;
+  }
+  renderAll();
+  toast('Đã xoá');
+});
+
+/* =================== PUBLISH =================== */
+$('#publishBtn').addEventListener('click', () => {
+  const p = currentPost(); if (!p) return;
+  p.status = 'published';
+  saveCurrent(); renderAll();
+  toast('🎉 Đã xuất bản!');
+});
+
+/* =================== PREVIEW =================== */
+$('#previewBtn').addEventListener('click', openPreview);
+$('#closePreview').addEventListener('click', () => $('#previewModal').classList.remove('show'));
+function openPreview() {
+  const p = currentPost(); if (!p) return;
+  saveCurrent();
+  const mood = p.mood ? MOODS.find(m=>m.e===p.mood) : null;
+  $('#previewContent').innerHTML = `
+    <h1 class="font-merri font-bold text-3xl mb-2">${p.title||'(Không tiêu đề)'}</h1>
+    <div class="text-sm mb-6" style="color: var(--fg-muted);">
+      ${new Date(p.date).toLocaleDateString('vi-VN')} ${mood?`• ${mood.e} ${mood.n}`:''} • ${Math.max(1, Math.round(countWords(p.content).words/200))} phút đọc
+    </div>
+    <div class="editor-content ${p.dropCap?'drop-cap':''}">${p.content}</div>
+    ${p.signature?`<div class="mt-8 pt-4 border-t text-sm italic" style="border-color: var(--border); color: var(--fg-muted);">— ${p.signature}</div>`:''}
+    ${p.tags.length?`<div class="mt-4 flex gap-1 flex-wrap">${p.tags.map(t=>`<span class="chip">#${t}</span>`).join('')}</div>`:''}
+  `;
+  $('#previewModal').classList.add('show');
+}
+
+/* =================== EXPORT =================== */
+function htmlToMd(html) {
+  return html
+    .replace(/<h1[^>]*>(.*?)<\/h1>/gi,'# $1\n\n')
+    .replace(/<h2[^>]*>(.*?)<\/h2>/gi,'## $1\n\n')
+    .replace(/<h3[^>]*>(.*?)<\/h3>/gi,'### $1\n\n')
+    .replace(/<strong>(.*?)<\/strong>/gi,'**$1**')
+    .replace(/<b>(.*?)<\/b>/gi,'**$1**')
+    .replace(/<em>(.*?)<\/em>/gi,'*$1*')
+    .replace(/<i>(.*?)<\/i>/gi,'*$1*')
+    .replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis,'> $1\n\n')
+    .replace(/<code>(.*?)<\/code>/gi,'`$1`')
+    .replace(/<li[^>]*>(.*?)<\/li>/gi,'- $1\n')
+    .replace(/<\/?[uo]l>/gi,'\n')
+    .replace(/<a[^>]*href="([^"]*)"[^>]*>(.*?)<\/a>/gi,'[$2]($1)')
+    .replace(/<img[^>]*src="([^"]*)"[^>]*>/gi,'![]($1)')
+    .replace(/<hr\s*\/?>/gi,'\n---\n')
+    .replace(/<p[^>]*>(.*?)<\/p>/gi,'$1\n\n')
+    .replace(/<br\s*\/?>/gi,'\n')
+    .replace(/<[^>]+>/g,'')
+    .replace(/\n{3,}/g,'\n\n').trim();
+}
+
+function download(filename, text) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text], {type:'text/plain'}));
+  a.download = filename; a.click();
+}
+
+$('#exportMd').addEventListener('click', () => {
+  const p = currentPost();
+  const md = `# ${p.title}\n\n${htmlToMd(p.content)}`;
+  download((p.slug||'bai-viet')+'.md', md);
+  toast('Đã tải Markdown');
+});
+$('#exportHtml').addEventListener('click', () => {
+  const p = currentPost();
+  download((p.slug||'bai-viet')+'.html', `<h1>${p.title}</h1>\n${p.content}`);
+  toast('Đã tải HTML');
+});
+$('#copyLink').addEventListener('click', () => {
+  const p = currentPost();
+  navigator.clipboard.writeText(`https://myblog.com/${p.slug}`);
+  toast('Đã copy link');
+});
+
+/* =================== DAILY PROMPT =================== */
+function newPrompt() {
+  $('#promptText').textContent = PROMPTS[Math.floor(Math.random()*PROMPTS.length)];
+}
+$('#newPrompt').addEventListener('click', newPrompt);
+$('#closePrompt').addEventListener('click', () => $('#dailyPrompt').style.display='none');
+newPrompt();
+
+/* =================== KEYBOARD SHORTCUTS =================== */
+document.addEventListener('keydown', (e) => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 's') { e.preventDefault(); saveCurrent(); toast('Đã lưu'); }
+    else if (e.key === '/') { e.preventDefault(); $('#shortcutsModal').classList.add('show'); }
+    else if (e.shiftKey && e.key.toLowerCase() === 'f') { e.preventDefault(); $('#focusBtn').click(); }
+    else if (e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); $('#zenBtn').click(); }
+    else if (e.shiftKey && e.key.toLowerCase() === 'p') { e.preventDefault(); openPreview(); }
+  }
+  if (e.key === 'Escape') {
+    document.body.classList.remove('zen-mode', 'focus-mode');
+    $('#previewModal').classList.remove('show');
+    $('#shortcutsModal').classList.remove('show');
+  }
+});
+$('#closeShortcuts').addEventListener('click', () => $('#shortcutsModal').classList.remove('show'));
+
+/* =================== INIT =================== */
+renderAll();
+</script>
+</body>
+</html>

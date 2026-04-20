@@ -366,6 +366,7 @@ export default function PersonalEditorPage() {
               </button>
               <div className="flex h-7 w-7 items-center justify-center rounded-full border text-xs">✍️</div>
               <p className="text-sm font-semibold">Personal Blog Editor</p>
+              <Link href="/editor/source" className="rounded-md border px-2 py-1 text-[11px] hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10">Source HTML</Link>
             </div>
 
             <div className="flex items-center gap-2">
