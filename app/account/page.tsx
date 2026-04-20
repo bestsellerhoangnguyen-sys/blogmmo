@@ -10,6 +10,7 @@ export default function AccountPage() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [msg, setMsg] = useState("");
+  const [claiming, setClaiming] = useState(false);
 
   if (status === "loading") return <main className="text-sm text-zinc-500">Loading...</main>;
 
@@ -52,6 +53,29 @@ export default function AccountPage() {
     setMsg("Đổi mật khẩu thành công");
   }
 
+  async function claimAdminRole() {
+    setMsg("");
+    setClaiming(true);
+    const csrf = document.cookie
+      .split("; ")
+      .find((x) => x.startsWith("blogmmo_csrf="))
+      ?.split("=")[1] || "";
+
+    const res = await fetch("/api/account/claim-admin", {
+      method: "POST",
+      headers: { "x-csrf-token": csrf },
+    });
+    const data = await res.json().catch(() => ({}));
+    setClaiming(false);
+
+    if (!res.ok) {
+      setMsg(data.error || "Claim admin thất bại");
+      return;
+    }
+
+    setMsg("Đã cấp quyền ADMIN cho tài khoản. Vui lòng đăng xuất/đăng nhập lại để refresh phiên.");
+  }
+
   return (
     <main className="space-y-6">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Account" }]} />
@@ -81,6 +105,15 @@ export default function AccountPage() {
           >
             Đăng xuất phiên hiện tại
           </button>
+        </div>
+
+        <div className="mt-4">
+          <button onClick={claimAdminRole} disabled={claiming} className="rounded-xl border px-3 py-2 text-sm hover:bg-black/5 disabled:opacity-60 dark:border-white/20 dark:hover:bg-white/10">
+            {claiming ? "Đang xử lý..." : "Claim ADMIN (first account bootstrap)"}
+          </button>
+          <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+            Chỉ hoạt động khi hệ thống chưa có bất kỳ tài khoản ADMIN nào trong DB.
+          </p>
         </div>
 
         <div className="mt-4 space-y-2">
