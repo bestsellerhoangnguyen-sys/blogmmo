@@ -34,8 +34,17 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   return (
     <main className="space-y-5 sm:space-y-6">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
+
+      <section className="rounded-2xl border border-orange-500/40 bg-gradient-to-br from-zinc-950 via-black to-zinc-900 p-5 text-white sm:p-7">
+        <p className="text-[10px] uppercase tracking-[0.26em] text-orange-400">Editorial Feed</p>
+        <h1 className="mt-2 text-3xl font-black leading-tight sm:text-5xl">Blog</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-zinc-300 sm:text-base">
+          Danh sách bài viết thực chiến về UI/UX, product thinking và triển khai website.
+        </p>
+      </section>
+
       <PageHeader
-        title="Blog"
+        title="Kho bài viết"
         description={`Danh sách bài viết đã publish (${total} bài).`}
       />
 
@@ -45,8 +54,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         <div className="grid gap-3 sm:gap-4">
           {posts.map((post) => (
             <Surface key={post.id}>
-              <h2 className="text-lg font-semibold leading-tight sm:text-xl">{post.title}</h2>
-              <p className="mt-1 text-sm text-gray-500">
+              <div className="mb-3 h-28 rounded-xl bg-gradient-to-br from-orange-500/40 via-zinc-900 to-zinc-950" />
+              <h2 className="text-lg font-black leading-tight sm:text-2xl">{post.title}</h2>
+              <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">
                 {post.publishedAt
                   ? new Date(post.publishedAt).toLocaleDateString("vi-VN")
                   : "Chưa publish"}
@@ -61,9 +71,9 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               </div>
               <Link
                 href={`/blog/${post.slug}`}
-                className="mt-4 inline-block text-sm font-medium text-blue-600 hover:underline dark:text-blue-400"
+                className="mt-4 inline-block rounded-lg border border-orange-500/50 px-3 py-1.5 text-sm font-semibold text-orange-500 transition hover:bg-orange-500/10"
               >
-                Đọc chi tiết →
+                Đọc chi tiết
               </Link>
             </Surface>
           ))}
@@ -73,7 +83,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
       <div className="flex flex-wrap items-center justify-between gap-2 border-t pt-4 dark:border-white/20">
         <Link
           href={currentPage > 1 ? `/blog?page=${currentPage - 1}` : "/blog?page=1"}
-          className={`rounded-xl border px-3 py-2 text-sm ${
+          className={`rounded-xl border border-zinc-400/40 px-3 py-2 text-sm ${
             currentPage <= 1 ? "pointer-events-none opacity-40" : ""
           }`}
         >
@@ -88,7 +98,7 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
               ? `/blog?page=${currentPage + 1}`
               : `/blog?page=${totalPages}`
           }
-          className={`rounded-xl border px-3 py-2 text-sm ${
+          className={`rounded-xl border border-zinc-400/40 px-3 py-2 text-sm ${
             currentPage >= totalPages ? "pointer-events-none opacity-40" : ""
           }`}
         >
