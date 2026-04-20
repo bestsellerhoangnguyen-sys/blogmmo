@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nhật ký — Blog cá nhân</title>
+<meta name="description" content="Những ghi chép nhỏ cho một ngày vừa trôi qua." />
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+  /* Reading progress */
+  .read-progress {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: var(--accent); z-index: 60; transition: width .1s;
+  }
+  .site-header {
+    background: rgba(250,250,247,.85); border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(12px);
+  }
+  html.dark .site-header { background: rgba(26,26,26,.85); }
+  html.sepia .site-header { background: rgba(244,236,216,.85); }
+
+  .nav-link {
+    color: var(--fg-muted); font-size: .9rem;
+    padding: .4rem .7rem; border-radius: 6px; transition: all .2s;
+    text-decoration: none;
+  }
+  .nav-link:hover { color: var(--fg); background: var(--bg-2); }
+  .nav-link.active { color: var(--accent); font-weight: 500; }
+
+  .post-card { transition: transform .2s, box-shadow .2s; cursor: pointer; }
+  .post-card:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(0,0,0,.08); }
+  html.dark .post-card:hover { box-shadow: 0 14px 32px rgba(0,0,0,.3); }
+
+  .hero-img { background-size: cover; background-position: center; border-radius: 12px; }
+
+  .search-input {
+    background: var(--bg-2); border: 1px solid var(--border);
+    color: var(--fg); padding: .5rem .8rem .5rem 2.2rem;
+    border-radius: 999px; font-size: .85rem; width: 220px;
+    transition: all .2s;
+  }
+  .search-input:focus { outline: 2px solid var(--accent); outline-offset: 1px; width: 280px; }
+
+  .toc {
+    position: sticky; top: 88px;
+    font-size: .85rem; max-height: calc(100vh - 140px); overflow-y: auto;
+  }
+  .toc a {
+    display: block; padding: .3rem .75rem;
+    color: var(--fg-muted); border-left: 2px solid var(--border);
+    transition: all .2s; line-height: 1.5; text-decoration: none;
+  }
+  .toc a:hover { color: var(--fg); }
+  .toc a.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+  .toc a.h3 { padding-left: 1.5rem; font-size: .8rem; }
+
+  .back-to-top {
+    position: fixed; bottom: 24px; right: 24px;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--fg); display: none;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,.08);
+    z-index: 40; cursor: pointer; transition: all .2s;
+  }
+  .back-to-top:hover { background: var(--accent); color: white; }
+  .back-to-top.show { display: flex; }
+
+  .reaction-btn {
+    padding: .4rem .8rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--card);
+    font-size: .9rem; cursor: pointer;
+    display: inline-flex; align-items: center; gap: .4rem;
+    transition: all .2s;
+  }
+  .reaction-btn:hover { transform: scale(1.05); border-color: var(--accent); }
+  .reaction-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+  .view { display: none; }
+  .view.active { display: block; animation: slideUp .4s ease; }
+
+  footer {
+    background: var(--bg-2); border-top: 1px solid var(--border);
+    margin-top: 4rem; padding: 2.5rem 1rem;
+    color: var(--fg-muted); font-size: .85rem;
+  }
+
+  /* Cookie banner */
+  .cookie-banner {
+    position: fixed; bottom: 20px; left: 20px; right: 20px;
+    max-width: 480px; padding: 1rem 1.2rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; box-shadow: 0 12px 32px rgba(0,0,0,.15);
+    z-index: 50; font-size: .85rem;
+  }
+  .cookie-banner.hidden { display: none; }
+
+  /* Command palette */
+  .cmd-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,.5);
+    display: none; align-items: flex-start; justify-content: center;
+    padding-top: 10vh; z-index: 80; backdrop-filter: blur(4px);
+  }
+  .cmd-bg.show { display: flex; }
+  .cmd-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; width: 90%; max-width: 560px;
+    overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,.3);
+  }
+  .cmd-input {
+    width: 100%; padding: 1rem 1.25rem; font-size: 1rem;
+    background: transparent; border: 0; outline: 0; color: var(--fg);
+    border-bottom: 1px solid var(--border); font-family: inherit;
+  }
+  .cmd-item {
+    padding: .7rem 1.2rem; cursor: pointer;
+    display: flex; align-items: center; gap: .8rem;
+  }
+  .cmd-item:hover, .cmd-item.active { background: var(--bg-2); }
+
+  /* Lightbox */
+  .lightbox {
+    position: fixed; inset: 0; background: rgba(0,0,0,.9);
+    display: none; align-items: center; justify-content: center;
+    z-index: 150; cursor: zoom-out;
+  }
+  .lightbox.show { display: flex; }
+  .lightbox-content {
+    max-width: 90vw; max-height: 90vh; border-radius: 12px;
+  }
+
+  /* Comment styles */
+  .comment {
+    border-bottom: 1px solid var(--border); padding: 1rem 0;
+  }
+  .comment:last-child { border-bottom: 0; }
+  .comment-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; color: white; flex-shrink: 0; font-size: .85rem;
+  }
+
+  /* Mobile nav */
+  .mobile-nav {
+    position: fixed; top: 0; right: 0; bottom: 0; width: 280px;
+    background: var(--card); border-left: 1px solid var(--border);
+    z-index: 70; transform: translateX(100%); transition: transform .3s;
+    padding: 1rem;
+  }
+  .mobile-nav.open { transform: translateX(0); }
+  @media (max-width: 768px) {
+    .hide-mobile { display: none !important; }
+    .search-input { width: 140px; }
+    .search-input:focus { width: 180px; }
+  }
+  @media (min-width: 769px) {
+    .only-mobile { display: none !important; }
+  }
+
+  /* Featured hero */
+  .featured-bg {
+    position: relative; border-radius: 16px; overflow: hidden;
+    min-height: 380px; display: flex; align-items: flex-end;
+    color: white; cursor: pointer;
+    background-size: cover; background-position: center;
+  }
+  .featured-bg::after {
+    content:''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.75) 100%);
+  }
+  .featured-bg > * { position: relative; z-index: 1; }
+
+  /* Subscribe modal */
+  .subscribe-box {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 2rem; text-align: center;
+  }
+
+  /* Author card */
+  .author-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.5rem;
+  }
+</style>
+</head>
+<body>
+
+<div id="readProgress" class="read-progress" style="width: 0%"></div>
+
+<!-- HEADER -->
+<header class="site-header sticky top-0 z-50 no-print">
+  <div class="max-w-5xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+    <a href="#/" class="flex items-center gap-2 flex-shrink-0" style="text-decoration:none;color:inherit;">
+      <div id="siteAvatar" class="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold" style="background: var(--accent);">N</div>
+      <div>
+        <div id="siteTitle" class="font-merri font-bold text-lg leading-none">Nhật ký</div>
+        <div id="siteTagline" class="text-xs hide-mobile" style="color: var(--fg-muted);">Blog cá nhân của Anh Hoàng</div>
+      </div>
+    </a>
+
+    <nav class="flex items-center gap-1 hide-mobile">
+      <a href="#/" class="nav-link" data-nav="home">Trang chủ</a>
+      <a href="#/archive" class="nav-link" data-nav="archive">Lưu trữ</a>
+      <a href="#/categories" class="nav-link" data-nav="categories">Chuyên mục</a>
+      <a href="#/tags" class="nav-link" data-nav="tags">Chủ đề</a>
+      <a href="#/about" class="nav-link" data-nav="about">Về tôi</a>
+    </nav>
+
+    <div class="flex items-center gap-2">
+      <div class="relative hide-mobile">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--fg-muted);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" class="search-input" placeholder="Tìm bài viết... (Ctrl+K)" />
+      </div>
+      <button id="cmdBtnMobile" class="btn btn-icon btn-ghost only-mobile" title="Tìm kiếm">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+      <button id="fontBtn" class="btn btn-icon btn-ghost" title="Kích thước chữ">Aa</button>
+      <button id="themeBtn" class="btn btn-icon btn-ghost" title="Đổi giao diện">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button id="mobileMenuBtn" class="btn btn-icon btn-ghost only-mobile" title="Menu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile nav -->
+<nav id="mobileNav" class="mobile-nav no-print">
+  <div class="flex justify-end mb-4">
+    <button id="closeMobileNav" class="btn btn-icon btn-ghost">✕</button>
+  </div>
+  <a href="#/" class="nav-link block py-2" onclick="closeMobileNav()">Trang chủ</a>
+  <a href="#/archive" class="nav-link block py-2" onclick="closeMobileNav()">Lưu trữ</a>
+  <a href="#/categories" class="nav-link block py-2" onclick="closeMobileNav()">Chuyên mục</a>
+  <a href="#/tags" class="nav-link block py-2" onclick="closeMobileNav()">Chủ đề</a>
+  <a href="#/about" class="nav-link block py-2" onclick="closeMobileNav()">Về tôi</a>
+  <div class="mt-6 pt-4 border-t" style="border-color: var(--border);">
+    <a href="admin.html" class="nav-link block py-2">⚙️ Admin</a>
+  </div>
+</nav>
+
+<!-- ============ HOME VIEW ============ -->
+<div id="homeView" class="view">
+  <section class="max-w-5xl mx-auto px-4 md:px-6 pt-10 pb-8">
+    <div class="text-center mb-10">
+      <div class="text-sm mb-2" style="color: var(--fg-muted);">✍️ Cập nhật thường xuyên</div>
+      <h1 class="font-merri font-bold text-4xl md:text-5xl leading-tight mb-4">Những ghi chép nhỏ<br/>cho một ngày vừa trôi qua.</h1>
+      <p id="homeTagline" class="text-lg max-w-xl mx-auto" style="color: var(--fg-muted);"></p>
+    </div>
+    <div id="featured"></div>
+  </section>
+
+  <section class="max-w-5xl mx-auto px-4 md:px-6 pb-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="font-merri font-bold text-2xl">Bài viết gần đây</h2>
+      <a href="#/archive" class="text-sm" style="color: var(--accent); text-decoration:none;">Xem tất cả →</a>
+    </div>
+    <div id="postGrid" class="grid md:grid-cols-2 gap-6"></div>
+  </section>
+
+  <!-- Categories preview -->
+  <section class="max-w-5xl mx-auto px-4 md:px-6 py-8">
+    <h2 class="font-merri font-bold text-2xl mb-6">Khám phá theo chuyên mục</h2>
+    <div id="categoriesPreview" class="grid grid-cols-2 md:grid-cols-5 gap-3"></div>
+  </section>
+
+  <!-- Newsletter -->
+  <section class="max-w-3xl mx-auto px-4 md:px-6 py-10">
+    <div class="subscribe-box">
+      <div class="text-3xl mb-2">📬</div>
+      <h3 class="font-merri font-bold text-xl mb-2">Nhận bài mới qua email</h3>
+      <p class="text-sm mb-4" style="color: var(--fg-muted);">Mỗi khi có bài mới, tôi sẽ gửi cho bạn một bản sao — không spam, không quảng cáo.</p>
+      <form onsubmit="subscribeNewsletter(event)" class="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+        <input type="email" required placeholder="email@cuaban.com" class="input" />
+        <button type="submit" class="btn btn-primary whitespace-nowrap">Đăng ký</button>
+      </form>
+      <p class="text-xs mt-3" style="color: var(--fg-muted);"><span id="subscriberCount">0</span> người đã đăng ký</p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ ARTICLE VIEW ============ -->
+<div id="articleView" class="view">
+  <article class="max-w-5xl mx-auto px-4 md:px-6 pt-8 pb-12 relative">
+    <nav class="text-xs mb-6" style="color: var(--fg-muted);">
+      <a href="#/" style="color:inherit;">Trang chủ</a>
+      <span class="mx-2">/</span>
+      <span id="breadCat"></span>
+      <span class="mx-2">/</span>
+      <span id="breadTitle" style="color: var(--fg);"></span>
+    </nav>
+
+    <div class="grid md:grid-cols-[1fr_220px] gap-10">
+      <div class="min-w-0">
+        <div id="artCover" class="hero-img h-56 md:h-80 mb-8"></div>
+        <div id="artMood" class="mb-3"></div>
+        <h1 id="artTitle" class="font-merri font-bold text-3xl md:text-4xl leading-tight mb-4"></h1>
+        <div class="flex items-center gap-3 mb-8 text-sm flex-wrap" style="color: var(--fg-muted);">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background: var(--accent);">N</div>
+            <span id="artAuthor">Anh Hoàng</span>
+          </div>
+          <span>•</span>
+          <span id="artDate"></span>
+          <span>•</span>
+          <span id="artReadTime"></span>
+          <span>•</span>
+          <span>👁 <span id="artViews">0</span></span>
+        </div>
+
+        <div id="artContent" class="article-content"></div>
+
+        <div id="artSignature" class="mt-10 pt-6 border-t italic text-sm" style="border-color: var(--border); color: var(--fg-muted);"></div>
+
+        <div id="artTags" class="mt-6 flex flex-wrap gap-2"></div>
+
+        <!-- Reactions -->
+        <div id="reactionsBox" class="mt-8 pt-6 border-t" style="border-color: var(--border);">
+          <div class="text-sm mb-3" style="color: var(--fg-muted);">Bài viết này cho bạn cảm giác gì?</div>
+          <div class="flex flex-wrap gap-2" id="reactions">
+            <button class="reaction-btn" data-r="heart">❤️ <span data-count="heart">0</span></button>
+            <button class="reaction-btn" data-r="clap">🙌 <span data-count="clap">0</span></button>
+            <button class="reaction-btn" data-r="thinking">💭 <span data-count="thinking">0</span></button>
+            <button class="reaction-btn" data-r="cry">🥲 <span data-count="cry">0</span></button>
+            <button class="reaction-btn" data-r="coffee">☕ <span data-count="coffee">0</span></button>
+          </div>
+        </div>
+
+        <!-- Share -->
+        <div class="mt-6 flex items-center gap-2 text-sm flex-wrap">
+          <span style="color: var(--fg-muted);">Chia sẻ:</span>
+          <button onclick="shareTo('facebook')" class="btn btn-outline">📘 Facebook</button>
+          <button onclick="shareTo('twitter')" class="btn btn-outline">𝕏 Twitter</button>
+          <button onclick="shareTo('copy')" class="btn btn-outline">🔗 Copy link</button>
+          <button onclick="window.print()" class="btn btn-outline">🖨 In</button>
+        </div>
+
+        <!-- Author bio -->
+        <div class="mt-10 author-card flex gap-4">
+          <div class="w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-white text-xl font-bold" style="background: var(--accent);">N</div>
+          <div>
+            <div class="font-merri font-bold" id="bioName">Anh Hoàng</div>
+            <div class="text-xs mb-2" style="color: var(--fg-muted);" id="bioTag">Người viết, người đọc, người pha cà phê vụng về.</div>
+            <div class="text-sm" id="bioText">Viết blog này từ 2023. Thích đi bộ, đọc sách, và ngồi yên một chỗ.</div>
+          </div>
+        </div>
+
+        <!-- Comments -->
+        <div id="commentsSection" class="mt-10">
+          <h3 class="font-merri font-bold text-xl mb-4">💬 Bình luận <span id="commentCount" class="text-sm font-normal" style="color: var(--fg-muted);"></span></h3>
+
+          <form onsubmit="postComment(event)" class="card mb-6">
+            <div class="grid md:grid-cols-2 gap-3 mb-3">
+              <input id="commentAuthor" required placeholder="Tên của bạn" class="input" />
+              <input id="commentEmail" required type="email" placeholder="Email (không hiển thị)" class="input" />
+            </div>
+            <textarea id="commentContent" required rows="3" placeholder="Viết bình luận..." class="textarea mb-3"></textarea>
+            <div class="flex items-center justify-between text-xs">
+              <span style="color: var(--fg-muted);">Bình luận sẽ hiển thị sau khi được duyệt.</span>
+              <button type="submit" class="btn btn-primary">Gửi bình luận</button>
+            </div>
+          </form>
+
+          <div id="commentsList"></div>
+        </div>
+
+        <!-- Related -->
+        <div class="mt-10">
+          <h3 class="font-merri font-bold text-xl mb-4">Có thể bạn cũng thích</h3>
+          <div id="relatedPosts" class="grid sm:grid-cols-2 gap-4"></div>
+        </div>
+
+        <!-- Prev/Next -->
+        <div id="prevNext" class="mt-10 grid grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- TOC sidebar -->
+      <aside class="hide-mobile">
+        <div class="toc">
+          <div class="text-xs font-medium mb-2 uppercase tracking-wide" style="color: var(--fg-muted);">Mục lục</div>
+          <div id="tocList"></div>
+
+          <div class="mt-6 pt-4 border-t" style="border-color: var(--border);">
+            <div class="text-xs font-medium mb-3 uppercase tracking-wide" style="color: var(--fg-muted);">Tương tác</div>
+            <div class="flex flex-col gap-2">
+              <button onclick="shareTo('copy')" class="btn btn-outline text-xs justify-start">🔗 Copy link</button>
+              <button onclick="window.print()" class="btn btn-outline text-xs justify-start">🖨 In bài này</button>
+              <button onclick="bookmarkPost()" class="btn btn-outline text-xs justify-start">⭐ Đánh dấu</button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </article>
+</div>
+
+<!-- ============ ARCHIVE VIEW ============ -->
+<div id="archiveView" class="view">
+  <section class="max-w-4xl mx-auto px-4 md:px-6 pt-10 pb-12">
+    <h1 class="font-merri font-bold text-3xl md:text-4xl mb-2">Lưu trữ</h1>
+    <p style="color: var(--fg-muted);" class="mb-8">Tất cả bài viết, sắp xếp theo thời gian.</p>
+    <div id="archiveList"></div>
+  </section>
+</div>
+
+<!-- ============ TAGS VIEW ============ -->
+<div id="tagsView" class="view">
+  <section class="max-w-4xl mx-auto px-4 md:px-6 pt-10 pb-12">
+    <h1 class="font-merri font-bold text-3xl md:text-4xl mb-2">Chủ đề</h1>
+    <p style="color: var(--fg-muted);" class="mb-6">Bấm vào một chủ đề để xem các bài liên quan.</p>
+    <div id="tagsCloud" class="flex flex-wrap gap-2 mb-10"></div>
+    <div id="tagFiltered"></div>
+  </section>
+</div>
+
+<!-- ============ CATEGORIES VIEW ============ -->
+<div id="categoriesView" class="view">
+  <section class="max-w-5xl mx-auto px-4 md:px-6 pt-10 pb-12">
+    <h1 class="font-merri font-bold text-3xl md:text-4xl mb-2">Chuyên mục</h1>
+    <p style="color: var(--fg-muted);" class="mb-8">Duyệt bài viết theo chuyên mục.</p>
+    <div id="categoriesList" class="grid md:grid-cols-3 gap-4 mb-10"></div>
+    <div id="categoryPosts"></div>
+  </section>
+</div>
+
+<!-- ============ ABOUT VIEW ============ -->
+<div id="aboutView" class="view">
+  <section class="max-w-2xl mx-auto px-4 md:px-6 pt-10 pb-12">
+    <div class="text-center mb-8">
+      <div id="aboutAvatar" class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-white text-3xl font-bold mb-4" style="background: var(--accent);">N</div>
+      <h1 class="font-merri font-bold text-3xl mb-2" id="aboutName">Xin chào, tôi là Anh Hoàng</h1>
+      <p style="color: var(--fg-muted);" id="aboutTag">Người viết, người đọc, người pha cà phê vụng về.</p>
+    </div>
+    <div class="article-content">
+      <p>Tôi bắt đầu viết blog này vào năm 2023, khi nhận ra rằng có quá nhiều thứ mình muốn ghi lại nhưng không biết gửi ở đâu. Facebook thì ồn ào, note trong điện thoại thì dễ mất, và những cuốn sổ giấy — dù tôi yêu chúng — không còn đủ chỗ.</p>
+      <p>Ở đây, tôi viết về những thứ rất nhỏ: một buổi sáng tỉnh dậy thấy mưa, một tiệm cà phê mới mở, một cuốn sách đọc dở rồi bỏ dở.</p>
+      <blockquote>"Viết, với tôi, là cách duy nhất để nhớ — và để quên."</blockquote>
+      <h2>Những chủ đề tôi hay viết</h2>
+      <ul>
+        <li><strong>Đời sống</strong> — những quan sát lặt vặt</li>
+        <li><strong>Du lịch</strong> — đi bộ, đi một mình, đi không kế hoạch</li>
+        <li><strong>Sách</strong> — đọc gì, nghĩ gì sau khi đọc</li>
+        <li><strong>Suy ngẫm</strong> — những lúc 3 giờ sáng không ngủ được</li>
+        <li><strong>Công nghệ</strong> — một công việc, cũng là một thú vui</li>
+      </ul>
+      <h2>Liên hệ</h2>
+      <p>Bạn có thể viết email cho tôi ở <a href="mailto:hello@nhatky.blog" id="aboutEmail">hello@nhatky.blog</a>. Tôi trả lời hầu hết các email, dù đôi khi hơi muộn.</p>
+      <p><em>Cảm ơn bạn đã ghé qua.</em></p>
+    </div>
+  </section>
+</div>
+
+<!-- ============ 404 VIEW ============ -->
+<div id="notFoundView" class="view">
+  <section class="max-w-xl mx-auto px-4 md:px-6 py-20 text-center">
+    <div class="text-6xl mb-4">🍃</div>
+    <h1 class="font-merri font-bold text-3xl mb-3">Không tìm thấy trang này</h1>
+    <p style="color: var(--fg-muted);" class="mb-6">Có thể đường link đã cũ, hoặc trang đã được chuyển đi nơi khác.</p>
+    <a href="#/" class="btn btn-primary">← Về trang chủ</a>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer class="no-print">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+    <div>
+      <div class="font-merri font-bold" id="footerTitle" style="color: var(--fg);">Nhật ký</div>
+      <div>© 2026 <span id="footerAuthor">Anh Hoàng</span>. Viết bằng cảm xúc, gõ bằng bàn phím cơ.</div>
+    </div>
+    <div class="flex gap-4 flex-wrap justify-center">
+      <a href="#/archive" class="nav-link">Lưu trữ</a>
+      <a href="#/about" class="nav-link">Về tôi</a>
+      <a href="rss.xml" class="nav-link">RSS</a>
+      <a href="admin.html" class="nav-link">Admin</a>
+    </div>
+  </div>
+</footer>
+
+<button id="backTop" class="back-to-top no-print" title="Lên đầu trang">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<div id="toast" class="toast">Đã lưu</div>
+
+<!-- Command palette -->
+<div id="cmdBg" class="cmd-bg">
+  <div class="cmd-box">
+    <input id="cmdInput" class="cmd-input" placeholder="Tìm bài viết, chủ đề, lệnh..." />
+    <div id="cmdResults" style="max-height: 400px; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox" onclick="this.classList.remove('show')">
+  <div id="lightboxContent" class="lightbox-content"></div>
+</div>
+
+<!-- Cookie banner -->
+<div id="cookieBanner" class="cookie-banner no-print hidden">
+  <div class="flex items-start gap-3">
+    <div class="text-xl">🍪</div>
+    <div class="flex-1">
+      <div class="font-medium mb-1">Blog này dùng cookie</div>
+      <div style="color: var(--fg-muted);" class="mb-3">Để ghi nhớ theme, cỡ chữ và reaction của bạn. Không theo dõi, không bán dữ liệu.</div>
+      <button onclick="acceptCookies()" class="btn btn-primary text-xs">Đồng ý</button>
+      <button onclick="$('#cookieBanner').classList.add('hidden')" class="btn btn-ghost text-xs">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<script src="shared.js"></script>
+<script>
+/* =================== STATE =================== */
+let state = {
+  view: 'home',
+  currentSlug: null,
+  theme: localStorage.getItem('theme') || 'light',
+  textSize: localStorage.getItem('textSize') || 'm',
+  selectedTag: null,
+  selectedCategory: null,
+  reactions: JSON.parse(localStorage.getItem('reactions') || '{}'),
+  bookmarks: JSON.parse(localStorage.getItem('bookmarks') || '[]'),
+};
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1800);
+}
+
+/* =================== ROUTING =================== */
+function parseHash() {
+  const hash = location.hash.slice(1) || '/';
+  const parts = hash.split('/').filter(Boolean);
+  if (parts.length === 0) return { route: 'home' };
+  if (parts[0] === 'post' && parts[1]) return { route: 'article', slug: parts[1] };
+  if (parts[0] === 'archive') return { route: 'archive' };
+  if (parts[0] === 'tags') return { route: 'tags', tag: parts[1] };
+  if (parts[0] === 'categories') return { route: 'categories', cat: parts[1] };
+  if (parts[0] === 'about') return { route: 'about' };
+  return { route: '404' };
+}
+
+function route() {
+  const r = parseHash();
+  setView(r.route);
+  if (r.route === 'home') renderHome();
+  else if (r.route === 'article') renderArticle(r.slug);
+  else if (r.route === 'archive') renderArchive();
+  else if (r.route === 'tags') { state.selectedTag = r.tag; renderTags(); }
+  else if (r.route === 'categories') { state.selectedCategory = r.cat; renderCategories(); }
+  else if (r.route === 'about') renderAbout();
+  window.scrollTo({top: 0});
+}
+
+function setView(name) {
+  if (name === '404') name = 'notFound';
+  state.view = name;
+  $$('.view').forEach(v => v.classList.remove('active'));
+  const el = document.getElementById(name + 'View');
+  if (el) el.classList.add('active');
+  $$('[data-nav]').forEach(n => n.classList.toggle('active', n.dataset.nav === name));
+}
+
+window.addEventListener('hashchange', route);
+
+/* =================== SETTINGS APPLY =================== */
+function applySettings() {
+  const s = getSettings();
+  $('#siteTitle').textContent = s.siteTitle;
+  $('#siteTagline').textContent = s.siteTagline;
+  $('#siteAvatar').textContent = s.siteTitle.charAt(0).toUpperCase();
+  $('#homeTagline').textContent = s.siteDescription;
+  $('#footerTitle').textContent = s.siteTitle;
+  $('#footerAuthor').textContent = s.authorName;
+  $('#aboutName').textContent = `Xin chào, tôi là ${s.authorName}`;
+  $('#aboutTag').textContent = s.authorBio;
+  $('#aboutAvatar').textContent = s.authorName.charAt(0).toUpperCase();
+  $('#aboutEmail').textContent = s.authorEmail;
+  $('#aboutEmail').href = 'mailto:' + s.authorEmail;
+  $('#bioName').textContent = s.authorName;
+  $('#bioTag').textContent = s.authorBio;
+  document.title = s.siteTitle + ' — ' + s.siteTagline;
+  // Apply accent
+  document.documentElement.style.setProperty('--accent', s.accent);
+  // Subscribers count
+  const data = loadData();
+  $('#subscriberCount').textContent = (data.subscribers || []).length;
+}
+
+/* =================== HOME =================== */
+function renderHome() {
+  const posts = getPosts().filter(p => p.status === 'published');
+  const featured = posts.find(p => p.featured) || posts[0];
+  if (featured) {
+    const coverStyle = featured.coverImage
+      ? `background-image: url(${featured.coverImage});`
+      : `background: ${featured.cover};`;
+    $('#featured').innerHTML = `
+      <a href="#/post/${featured.slug}" class="featured-bg p-8 md:p-10 block" style="${coverStyle} text-decoration:none;">
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="text-xs font-medium" style="background: rgba(255,255,255,.2); padding: .2rem .6rem; border-radius: 999px; backdrop-filter: blur(8px);">✨ BÀI NỔI BẬT</span>
+            <span class="mood-badge" style="background: rgba(255,255,255,.2); color: white;">${featured.mood} ${MOODS[featured.mood]||''}</span>
+          </div>
+          <h2 class="font-merri font-bold text-3xl md:text-4xl mb-3 leading-tight">${featured.title}</h2>
+          <p class="mb-4 text-sm md:text-base opacity-90 max-w-2xl">${featured.excerpt}</p>
+          <div class="text-xs opacity-80">${fmtDate(featured.date)} • ${featured.readTime} phút đọc • 👁 ${featured.views} lượt xem</div>
+        </div>
+      </a>
+    `;
+  }
+
+  const others = posts.filter(p => p.id !== (featured?.id)).slice(0, 4);
+  $('#postGrid').innerHTML = others.map(postCard).join('');
+
+  // Categories preview
+  const cats = loadData().categories;
+  $('#categoriesPreview').innerHTML = cats.map(c => {
+    const count = posts.filter(p => p.categoryId === c.id).length;
+    return `<a href="#/categories/${c.slug}" class="card text-center hover:shadow-md transition" style="text-decoration:none; color:inherit; padding: 1rem;">
+      <div style="color:${c.color};" class="font-merri font-bold">${c.name}</div>
+      <div class="text-xs mt-1" style="color: var(--fg-muted);">${count} bài</div>
+    </a>`;
+  }).join('');
+}
+
+function postCard(p) {
+  const cov = p.coverImage ? `background-image: url(${p.coverImage});` : `background: ${p.cover};`;
+  return `
+    <a href="#/post/${p.slug}" class="post-card rounded-xl overflow-hidden card fade-in block" style="padding:0; text-decoration:none; color:inherit;">
+      <div class="h-40 hero-img" style="${cov}"></div>
+      <div class="p-5">
+        <div class="mb-2"><span class="mood-badge">${p.mood} ${MOODS[p.mood]||''}</span></div>
+        <h3 class="font-merri font-bold text-lg mb-2 leading-snug">${p.title}</h3>
+        <p class="text-sm mb-3" style="color: var(--fg-muted);">${p.excerpt}</p>
+        <div class="text-xs flex items-center gap-2" style="color: var(--fg-muted);">
+          <span>${fmtDate(p.date)}</span>
+          <span>•</span>
+          <span>${p.readTime} phút đọc</span>
+          <span>•</span>
+          <span>👁 ${p.views}</span>
+        </div>
+      </div>
+    </a>
+  `;
+}
+
+/* =================== ARTICLE =================== */
+function renderArticle(slug) {
+  const p = getPostBySlug(slug);
+  if (!p) { setView('404'); return; }
+  state.currentSlug = slug;
+
+  // increment views (in-memory)
+  const data = loadData();
+  const post = data.posts.find(x => x.slug === slug);
+  if (post) { post.views = (post.views||0) + 1; saveData(data); }
+
+  const cats = data.categories;
+  const cat = cats.find(c => c.id === p.categoryId);
+  $('#breadCat').innerHTML = cat ? `<a href="#/categories/${cat.slug}" style="color:inherit;">${cat.name}</a>` : '';
+  $('#breadTitle').textContent = p.title;
+  $('#artTitle').textContent = p.title;
+  document.title = p.title + ' — ' + getSettings().siteTitle;
+  $('#artMood').innerHTML = p.mood ? `<span class="mood-badge">${p.mood} ${MOODS[p.mood]||''}</span>` : '';
+  $('#artDate').textContent = fmtDate(p.date);
+  $('#artReadTime').textContent = p.readTime + ' phút đọc';
+  $('#artViews').textContent = p.views;
+  $('#artAuthor').textContent = getSettings().authorName;
+
+  if (p.coverImage) $('#artCover').style.backgroundImage = `url(${p.coverImage})`;
+  else $('#artCover').style.background = p.cover;
+
+  $('#artContent').innerHTML = p.content;
+  $('#artContent').classList.toggle('drop-cap', !!p.dropCap);
+
+  hydrateEmbeds($('#artContent'));
+
+  // Enable lightbox on images and gallery items
+  $('#artContent').querySelectorAll('img, .gallery-item').forEach(el => {
+    el.style.cursor = 'zoom-in';
+    el.addEventListener('click', (e) => {
+      const lb = $('#lightbox');
+      const content = $('#lightboxContent');
+      if (el.tagName === 'IMG') {
+        content.innerHTML = `<img src="${el.src}" class="lightbox-content" />`;
+      } else {
+        content.innerHTML = `<div style="width:80vw;height:80vh;border-radius:12px;${el.style.cssText}"></div>`;
+      }
+      lb.classList.add('show');
+    });
+  });
+
+  $('#artSignature').innerHTML = p.signature ? `— ${p.signature}` : '';
+  $('#artTags').innerHTML = (p.tags||[]).map(t =>
+    `<a href="#/tags/${t}" class="chip" style="text-decoration:none;">#${t}</a>`
+  ).join('');
+
+  // TOC
+  const headings = $('#artContent').querySelectorAll('h2, h3');
+  const tocHtml = [...headings].map(h => {
+    if (!h.id) h.id = slugify(h.textContent);
+    const cls = h.tagName === 'H3' ? 'h3' : '';
+    return `<a href="#${h.id}" class="${cls}" onclick="scrollToId(event, '${h.id}')">${h.textContent}</a>`;
+  }).join('');
+  $('#tocList').innerHTML = tocHtml || '<div style="color: var(--fg-muted); font-size: .75rem;">Bài này không có mục lục.</div>';
+
+  // Related
+  const allPub = getPosts().filter(x => x.status === 'published' && x.id !== p.id);
+  const related = allPub.filter(x => x.tags.some(t => p.tags.includes(t))).slice(0, 2);
+  const rel = related.length ? related : allPub.slice(0, 2);
+  $('#relatedPosts').innerHTML = rel.map(r => {
+    const cov = r.coverImage ? `background-image: url(${r.coverImage});` : `background: ${r.cover};`;
+    return `<a href="#/post/${r.slug}" class="post-card rounded-lg p-4 block" style="background: var(--bg-2); border: 1px solid var(--border); text-decoration:none; color:inherit;">
+      <span class="mood-badge mb-2">${r.mood} ${MOODS[r.mood]||''}</span>
+      <div class="font-merri font-semibold mt-2 mb-1">${r.title}</div>
+      <div class="text-xs" style="color: var(--fg-muted);">${fmtDate(r.date)} • ${r.readTime} phút đọc</div>
+    </a>`;
+  }).join('');
+
+  // Prev/Next
+  const idx = allPub.findIndex(x => x.id === p.id);
+  const prev = allPub[idx+1], next = allPub[idx-1];
+  $('#prevNext').innerHTML = `
+    ${prev ? `<a href="#/post/${prev.slug}" class="post-card rounded-lg p-4 text-left block" style="background: var(--bg-2); border: 1px solid var(--border); text-decoration:none; color:inherit;">
+      <div class="text-xs mb-1" style="color: var(--fg-muted);">← Bài trước</div>
+      <div class="font-merri font-semibold text-sm">${prev.title}</div>
+    </a>` : '<div></div>'}
+    ${next ? `<a href="#/post/${next.slug}" class="post-card rounded-lg p-4 text-right block" style="background: var(--bg-2); border: 1px solid var(--border); text-decoration:none; color:inherit;">
+      <div class="text-xs mb-1" style="color: var(--fg-muted);">Bài sau →</div>
+      <div class="font-merri font-semibold text-sm">${next.title}</div>
+    </a>` : '<div></div>'}
+  `;
+
+  // Reactions
+  const rk = ['heart','clap','thinking','cry','coffee'];
+  const postR = data.reactions ? (data.reactions[p.id]||{}) : {};
+  const userR = state.reactions[p.id] || {};
+  rk.forEach(k => {
+    const count = postR[k] || Math.floor(Math.random()*15);
+    const el = $(`[data-count="${k}"]`);
+    if (el) el.textContent = count;
+  });
+  $$('#reactions .reaction-btn').forEach(b => {
+    const k = b.dataset.r;
+    b.classList.toggle('active', !!userR[k]);
+    b.onclick = () => toggleReaction(p.id, k, b);
+  });
+
+  renderComments(p.id);
+}
+
+function toggleReaction(postId, key, btn) {
+  state.reactions[postId] = state.reactions[postId] || {};
+  state.reactions[postId][key] = !state.reactions[postId][key];
+  btn.classList.toggle('active');
+  const span = btn.querySelector('span');
+  span.textContent = parseInt(span.textContent) + (btn.classList.contains('active') ? 1 : -1);
+  localStorage.setItem('reactions', JSON.stringify(state.reactions));
+}
+
+function scrollToId(e, id) {
+  e.preventDefault();
+  const el = document.getElementById(id);
+  if (el) window.scrollTo({top: el.offsetTop - 80, behavior: 'smooth'});
+}
+
+function bookmarkPost() {
+  const slug = state.currentSlug;
+  if (state.bookmarks.includes(slug)) {
+    state.bookmarks = state.bookmarks.filter(s => s !== slug);
+    toast('Đã bỏ đánh dấu');
+  } else {
+    state.bookmarks.push(slug);
+    toast('⭐ Đã đánh dấu bài viết');
+  }
+  localStorage.setItem('bookmarks', JSON.stringify(state.bookmarks));
+}
+
+/* =================== COMMENTS =================== */
+function renderComments(postId) {
+  const data = loadData();
+  const comments = (data.comments||[]).filter(c => c.postId === postId && c.approved);
+  $('#commentCount').textContent = `(${comments.length})`;
+  $('#commentsList').innerHTML = comments.length
+    ? comments.map(c => {
+        const initial = c.author.charAt(0).toUpperCase();
+        const color = '#' + Math.abs(hashCode(c.author)).toString(16).slice(0,6).padEnd(6,'0');
+        return `<div class="comment">
+          <div class="flex gap-3">
+            <div class="comment-avatar" style="background: ${color}">${initial}</div>
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="font-medium text-sm">${htmlEscape(c.author)}</span>
+                <span class="text-xs" style="color: var(--fg-muted);">${fmtDateTime(c.date)}</span>
+              </div>
+              <div class="text-sm" style="color: var(--fg);">${htmlEscape(c.content)}</div>
+              <div class="flex items-center gap-3 mt-2 text-xs" style="color: var(--fg-muted);">
+                <button onclick="likeComment('${c.id}')" style="color:inherit;">❤️ ${c.likes||0}</button>
+                <button onclick="toast('Chức năng reply đang phát triển')" style="color:inherit;">↩ Trả lời</button>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      }).join('')
+    : '<div class="text-center py-8" style="color: var(--fg-muted);">Chưa có bình luận nào. Bạn là người đầu tiên!</div>';
+}
+
+function hashCode(s) {
+  let h = 0;
+  for (let i=0; i<s.length; i++) h = ((h<<5)-h)+s.charCodeAt(i), h|=0;
+  return h;
+}
+
+function postComment(e) {
+  e.preventDefault();
+  const author = $('#commentAuthor').value.trim();
+  const email = $('#commentEmail').value.trim();
+  const content = $('#commentContent').value.trim();
+  if (!author || !email || !content) return;
+  const data = loadData();
+  data.comments = data.comments || [];
+  data.comments.push({
+    id: 'c' + Date.now(),
+    postId: getPostBySlug(state.currentSlug).id,
+    author, email, content,
+    date: new Date().toISOString().slice(0,16).replace('T',' '),
+    approved: false, likes: 0
+  });
+  saveData(data);
+  $('#commentAuthor').value = '';
+  $('#commentEmail').value = '';
+  $('#commentContent').value = '';
+  toast('Cảm ơn! Bình luận của bạn đang chờ duyệt.');
+}
+
+function likeComment(id) {
+  const data = loadData();
+  const c = data.comments.find(x => x.id === id);
+  if (c) { c.likes = (c.likes||0) + 1; saveData(data); renderComments(c.postId); }
+}
+
+/* =================== ARCHIVE =================== */
+function renderArchive() {
+  const posts = getPosts().filter(p => p.status === 'published');
+  const byYear = {};
+  posts.forEach(p => { const y = p.date.slice(0,4); (byYear[y] = byYear[y]||[]).push(p); });
+  $('#archiveList').innerHTML = Object.entries(byYear).sort((a,b) => b[0]-a[0]).map(([y, ps]) => `
+    <div class="mb-8">
+      <h2 class="font-merri font-bold text-2xl mb-3">${y} <span class="text-sm font-normal" style="color: var(--fg-muted);">(${ps.length} bài)</span></h2>
+      <div class="space-y-1">
+        ${ps.map(p => `
+          <a href="#/post/${p.slug}" class="post-card flex items-center justify-between gap-4 py-3 px-4 rounded-lg block" style="text-decoration:none;color:inherit;">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="text-lg">${p.mood}</span>
+              <div class="min-w-0">
+                <div class="font-merri font-semibold truncate">${p.title}</div>
+                <div class="text-xs truncate" style="color: var(--fg-muted);">${p.excerpt}</div>
+              </div>
+            </div>
+            <div class="text-xs flex-shrink-0" style="color: var(--fg-muted);">${p.date.slice(5)}</div>
+          </a>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+/* =================== TAGS =================== */
+function renderTags() {
+  const posts = getPosts().filter(p => p.status === 'published');
+  const tagCount = {};
+  posts.forEach(p => p.tags.forEach(t => tagCount[t] = (tagCount[t]||0)+1));
+  $('#tagsCloud').innerHTML = Object.entries(tagCount).sort((a,b)=>b[1]-a[1]).map(([t,c]) => `
+    <a href="#/tags/${t}" class="chip ${state.selectedTag===t?'active':''}" style="text-decoration:none;">#${t} <span style="opacity:.6;margin-left:4px;">${c}</span></a>
+  `).join('') + `<a href="#/tags" class="chip ${!state.selectedTag?'active':''}" style="text-decoration:none;">tất cả</a>`;
+  const filtered = state.selectedTag ? posts.filter(p => p.tags.includes(state.selectedTag)) : posts;
+  $('#tagFiltered').innerHTML = `
+    <div class="text-sm mb-4" style="color: var(--fg-muted);">${filtered.length} bài viết${state.selectedTag?` trong <strong style="color: var(--accent);">#${state.selectedTag}</strong>`:''}</div>
+    <div class="grid md:grid-cols-2 gap-6">${filtered.map(postCard).join('')}</div>
+  `;
+}
+
+/* =================== CATEGORIES ===================*/
+function renderCategories() {
+  const data = loadData();
+  const posts = getPosts().filter(p => p.status === 'published');
+  $('#categoriesList').innerHTML = data.categories.map(c => {
+    const count = posts.filter(p => p.categoryId === c.id).length;
+    return `<a href="#/categories/${c.slug}" class="card hover:shadow-md transition ${state.selectedCategory===c.slug?'border-2':''}" style="text-decoration:none;color:inherit;${state.selectedCategory===c.slug?'border-color: '+c.color:''}">
+      <div class="flex items-center justify-between">
+        <div class="font-merri font-bold" style="color:${c.color};">${c.name}</div>
+        <div class="text-xs" style="color: var(--fg-muted);">${count} bài</div>
+      </div>
+    </a>`;
+  }).join('');
+
+  if (state.selectedCategory) {
+    const cat = data.categories.find(c => c.slug === state.selectedCategory);
+    if (cat) {
+      const filtered = posts.filter(p => p.categoryId === cat.id);
+      $('#categoryPosts').innerHTML = `
+        <h2 class="font-merri font-bold text-2xl mb-4">${cat.name} <span class="text-sm font-normal" style="color: var(--fg-muted);">(${filtered.length} bài)</span></h2>
+        <div class="grid md:grid-cols-2 gap-6">${filtered.map(postCard).join('')}</div>
+      `;
+    }
+  } else {
+    $('#categoryPosts').innerHTML = '';
+  }
+}
+
+/* =================== ABOUT =================== */
+function renderAbout() {
+  applySettings();
+}
+
+/* =================== THEME / FONT SIZE =================== */
+function applyTheme() {
+  document.documentElement.className = state.theme === 'light' ? '' : state.theme;
+}
+const THEMES = ['light','dark','sepia'];
+$('#themeBtn').addEventListener('click', () => {
+  state.theme = THEMES[(THEMES.indexOf(state.theme)+1) % THEMES.length];
+  localStorage.setItem('theme', state.theme);
+  applyTheme();
+  toast(`Giao diện: ${state.theme==='light'?'Sáng':state.theme==='dark'?'Tối':'Sepia (giấy cũ)'}`);
+});
+
+function applyTextSize() {
+  document.body.className = 'text-size-' + state.textSize;
+}
+const SIZES = ['s','m','l'];
+$('#fontBtn').addEventListener('click', () => {
+  state.textSize = SIZES[(SIZES.indexOf(state.textSize)+1) % SIZES.length];
+  localStorage.setItem('textSize', state.textSize);
+  applyTextSize();
+  toast(`Cỡ chữ: ${state.textSize==='s'?'Nhỏ':state.textSize==='m'?'Vừa':'Lớn'}`);
+});
+
+/* =================== READING PROGRESS / TOC HIGHLIGHT =================== */
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = Math.min(100, (window.scrollY / h) * 100);
+  $('#readProgress').style.width = pct + '%';
+  $('#backTop').classList.toggle('show', window.scrollY > 400);
+
+  if (state.view === 'article') {
+    const headings = document.querySelectorAll('#artContent h2, #artContent h3');
+    let active = null;
+    headings.forEach(h => { if (h.getBoundingClientRect().top < 120) active = h; });
+    $$('#tocList a').forEach(a => {
+      a.classList.toggle('active', active && a.getAttribute('href') === '#' + active.id);
+    });
+  }
+});
+$('#backTop').addEventListener('click', () => window.scrollTo({top:0, behavior:'smooth'}));
+
+/* =================== SHARE =================== */
+function shareTo(platform) {
+  const p = getPostBySlug(state.currentSlug);
+  if (!p) return;
+  const url = encodeURIComponent(location.href);
+  const title = encodeURIComponent(p.title);
+  if (platform === 'facebook') window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  else if (platform === 'twitter') window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank');
+  else if (platform === 'copy') { navigator.clipboard.writeText(location.href); toast('Đã copy link'); }
+}
+
+/* =================== COMMAND PALETTE =================== */
+const cmdBg = $('#cmdBg');
+function openCmd() {
+  cmdBg.classList.add('show');
+  $('#cmdInput').value = ''; $('#cmdInput').focus();
+  renderCmdResults('');
+}
+function closeCmd() { cmdBg.classList.remove('show'); }
+
+function renderCmdResults(q) {
+  const posts = getPosts().filter(p => p.status === 'published');
+  q = q.toLowerCase().trim();
+  let results = posts;
+  if (q) results = posts.filter(p =>
+    p.title.toLowerCase().includes(q) ||
+    p.excerpt.toLowerCase().includes(q) ||
+    p.content.toLowerCase().includes(q) ||
+    (p.tags||[]).some(t => t.toLowerCase().includes(q))
+  );
+  results = results.slice(0, 8);
+  $('#cmdResults').innerHTML = results.length ? results.map((p,i) => `
+    <div class="cmd-item ${i===0?'active':''}" onclick="location.hash='#/post/${p.slug}';closeCmd()">
+      <span class="text-lg">${p.mood}</span>
+      <div class="min-w-0 flex-1">
+        <div class="font-medium text-sm truncate">${p.title}</div>
+        <div class="text-xs truncate" style="color: var(--fg-muted);">${(p.tags||[]).map(t=>'#'+t).join(' ')} • ${fmtDate(p.date)}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="p-6 text-center text-sm" style="color: var(--fg-muted);">Không tìm thấy bài nào.</div>`;
+}
+
+$('#cmdInput').addEventListener('input', (e) => renderCmdResults(e.target.value));
+$('#searchInput').addEventListener('focus', openCmd);
+$('#cmdBtnMobile').addEventListener('click', openCmd);
+cmdBg.addEventListener('click', (e) => { if (e.target === cmdBg) closeCmd(); });
+
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') { e.preventDefault(); openCmd(); }
+  if (e.key === 'Escape') { closeCmd(); $('#lightbox').classList.remove('show'); }
+});
+
+/* =================== MOBILE NAV =================== */
+$('#mobileMenuBtn').addEventListener('click', () => $('#mobileNav').classList.add('open'));
+$('#closeMobileNav').addEventListener('click', closeMobileNav);
+function closeMobileNav() { $('#mobileNav').classList.remove('open'); }
+
+/* =================== NEWSLETTER =================== */
+function subscribeNewsletter(e) {
+  e.preventDefault();
+  const email = e.target.querySelector('input').value;
+  const data = loadData();
+  data.subscribers = data.subscribers || [];
+  if (!data.subscribers.includes(email)) {
+    data.subscribers.push(email);
+    saveData(data);
+  }
+  $('#subscriberCount').textContent = data.subscribers.length;
+  toast('Cảm ơn bạn đã đăng ký! ✨');
+  e.target.reset();
+}
+
+/* =================== COOKIES =================== */
+if (!localStorage.getItem('cookieAccepted')) {
+  $('#cookieBanner').classList.remove('hidden');
+}
+function acceptCookies() {
+  localStorage.setItem('cookieAccepted', '1');
+  $('#cookieBanner').classList.add('hidden');
+}
+
+/* =================== INIT =================== */
+applyTheme();
+applyTextSize();
+applySettings();
+route();
+</script>
+</body>
+</html>
