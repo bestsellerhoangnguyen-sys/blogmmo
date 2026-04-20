@@ -91,11 +91,11 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
         >
           <div dangerouslySetInnerHTML={{ __html: html }} />
 
-          <div className="mt-8 rounded-xl border border-dashed border-zinc-300 p-4 dark:border-zinc-700">
+          <div className="mt-8 rounded-xl border border-orange-500/30 bg-zinc-950/70 p-4 dark:border-orange-500/30">
             <p className="text-sm font-semibold">Tiếp theo nên đọc gì?</p>
             <div className="mt-2 flex flex-wrap gap-3 text-sm">
-              <Link href="/guides" className="text-blue-600 hover:underline dark:text-blue-400">Xem Guides liên quan</Link>
-              <Link href="/feed.xml" className="text-blue-600 hover:underline dark:text-blue-400">Subscribe RSS</Link>
+              <Link href="/guides" className="text-orange-400 hover:underline">Xem Guides liên quan</Link>
+              <Link href="/feed.xml" className="text-orange-400 hover:underline">Subscribe RSS</Link>
             </div>
           </div>
 
@@ -107,7 +107,7 @@ export default async function BlogDetailPage({ params }: BlogDetailProps) {
                   <Link
                     key={item.id}
                     href={`/blog/${item.slug}`}
-                    className="rounded-lg border px-3 py-2 text-sm hover:bg-black/5 dark:border-white/20 dark:hover:bg-white/10"
+                    className="rounded-lg border border-orange-500/30 bg-zinc-950/70 px-3 py-2 text-sm hover:bg-orange-500/10"
                   >
                     {item.title}
                   </Link>
