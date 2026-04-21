@@ -1247,47 +1247,55 @@ let saveTimer;
 function autoSave() {
   $('#editorSaveStatus').textContent = 'Đang lưu...';
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => { savePost(); $('#editorSaveStatus').textContent = '✓ Đã lưu'; }, 700);
+  saveTimer = setTimeout(() => { savePost().catch(() => {}); }, 700);
 }
 
 async function savePost() {
   const data = loadData();
   const p = data.posts.find(x => x.id === state.editingPostId);
   if (!p) return;
-  p.title = $('#editorTitle').value;
-  p.slug = $('#editorSlug').value || slugify(p.title);
-  p.status = $('#editorStatus').value;
-  p.date = $('#editorDate').value;
-  p.tags = $('#editorTags').value.split(',').map(s=>s.trim()).filter(Boolean);
-  p.categoryId = $('#editorCategory').value;
-  p.featured = $('#editorFeatured').checked;
-  p.dropCap = $('#editorDropCap').checked;
-  p.signature = $('#editorSignature').value;
-  p.seoTitle = $('#editorSeoTitle').value;
-  p.seoDesc = $('#editorSeoDesc').value;
-  p.content = $('#editorCanvas').innerHTML;
-  p.excerpt = $('#editorSeoDesc').value || (p.content.replace(/<[^>]+>/g,' ').slice(0,160));
-  p.readTime = readingTime(p.content);
-  saveData(data);
+  const draft = {
+    ...p,
+    title: $('#editorTitle').value,
+    slug: $('#editorSlug').value || slugify($('#editorTitle').value),
+    status: $('#editorStatus').value,
+    date: $('#editorDate').value,
+    tags: $('#editorTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    categoryId: $('#editorCategory').value,
+    featured: $('#editorFeatured').checked,
+    dropCap: $('#editorDropCap').checked,
+    signature: $('#editorSignature').value,
+    seoTitle: $('#editorSeoTitle').value,
+    seoDesc: $('#editorSeoDesc').value,
+    content: $('#editorCanvas').innerHTML,
+  };
+  draft.excerpt = draft.seoDesc || (draft.content.replace(/<[^>]+>/g,' ').slice(0,160));
+  draft.readTime = readingTime(draft.content);
 
   try {
-    const saved = await saveCurrentPostToApi(p);
-    if (saved?.id && String(p.id).startsWith('p')) {
-      p.id = saved.id;
+    const saved = await saveCurrentPostToApi(draft);
+    if (saved?.id && String(draft.id).startsWith('p')) {
       state.editingPostId = saved.id;
       location.hash = '#/editor/' + saved.id;
     }
+    Object.assign(p, draft, { id: saved?.id || p.id });
+    saveData(data);
     await syncPostsFromApi();
+    $('#editorSaveStatus').textContent = '✓ Đã lưu';
   } catch (e) {
     console.error(e);
-    toast('Lưu API lỗi, đang giữ bản local');
+    $('#editorSaveStatus').textContent = 'Lỗi đồng bộ';
+    toast('Lưu API lỗi, chưa ghi local');
+    throw e;
   }
 }
 
 async function publishPost() {
   $('#editorStatus').value = 'published';
-  await savePost();
-  toast('🎉 Đã xuất bản!');
+  try {
+    await savePost();
+    toast('🎉 Đã xuất bản!');
+  } catch {}
 }
 
 async function previewPost() {
