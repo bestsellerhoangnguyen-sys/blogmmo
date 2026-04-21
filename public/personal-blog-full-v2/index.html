@@ -607,6 +607,41 @@ function applySettings() {
    .catch(() => { toast('Không thể đồng bộ settings từ server'); });
 }
 
+async function syncPostsFromApiForPublic() {
+  try {
+    const res = await fetch('/api/public/posts', { credentials: 'include' });
+    if (!res.ok) return;
+    const rows = await res.json();
+    const data = loadData();
+    const firstCatId = (data.categories || [])[0]?.id || '';
+
+    data.posts = (Array.isArray(rows) ? rows : []).map((p) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      excerpt: p.excerpt || '',
+      status: p.published ? 'published' : 'draft',
+      featured: false,
+      mood: p.mood || '📝',
+      tags: Array.isArray(p.tags) ? p.tags.map((t) => t.name).filter(Boolean) : [],
+      categoryId: firstCatId,
+      date: (p.publishedAt || p.createdAt || new Date().toISOString()).slice(0, 10),
+      readTime: readingTime(p.content || ''),
+      cover: 'linear-gradient(135deg, #8b7355, #3d2817)',
+      coverImage: '',
+      signature: '',
+      dropCap: false,
+      views: Number(p.views || 0),
+      content: p.content || '',
+    }));
+
+    saveData(data);
+    route();
+  } catch (e) {
+    console.error('sync posts public failed', e);
+  }
+}
+
 /* =================== HOME =================== */
 function renderHome() {
   const posts = getPosts().filter(p => p.status === 'published');
@@ -1108,6 +1143,7 @@ function acceptCookies() {
 applyTheme();
 applyTextSize();
 applySettings();
+syncPostsFromApiForPublic();
 route();
 </script>
 </body>
