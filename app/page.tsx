@@ -3,5 +3,6 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 export default function HomePage() {
-  redirect("/personal-blog-full-v2/index.html");
+  // Hotfix: fallback to stable reader while v2 runtime is being repaired.
+  redirect("/personal-blog-full/index.html");
 }
