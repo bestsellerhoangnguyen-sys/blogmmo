@@ -1140,12 +1140,15 @@ function renderPostsList() {
 
 function confirmDelete(id) {
   showConfirm('Xoá bài viết?', 'Bài viết sẽ bị xoá vĩnh viễn, không thể khôi phục.', () => {
-    deletePostOnApi(id).catch(() => { toast('Xóa API lỗi, đã xóa local'); });
-    const data = loadData();
-    data.posts = data.posts.filter(p => p.id !== id);
-    saveData(data);
-    renderPostsList();
-    toast('Đã xoá bài viết');
+    deletePostOnApi(id)
+      .then(() => {
+        const data = loadData();
+        data.posts = data.posts.filter(p => p.id !== id);
+        saveData(data);
+        renderPostsList();
+        toast('Đã xoá bài viết');
+      })
+      .catch(() => { toast('Xóa API lỗi'); });
   });
 }
 
@@ -1295,12 +1298,15 @@ async function previewPost() {
 
 function deletePost() {
   showConfirm('Xoá bài viết?', 'Bài sẽ bị xoá vĩnh viễn.', () => {
-    deletePostOnApi(state.editingPostId).catch(() => { toast('Xóa API lỗi, đã xóa local'); });
-    const data = loadData();
-    data.posts = data.posts.filter(p => p.id !== state.editingPostId);
-    saveData(data);
-    location.hash = '#/posts';
-    toast('Đã xoá');
+    deletePostOnApi(state.editingPostId)
+      .then(() => {
+        const data = loadData();
+        data.posts = data.posts.filter(p => p.id !== state.editingPostId);
+        saveData(data);
+        location.hash = '#/posts';
+        toast('Đã xoá');
+      })
+      .catch(() => { toast('Xóa API lỗi'); });
   });
 }
 
@@ -1696,45 +1702,60 @@ function renderComments() {
   $('#commentFilter').onchange = doRender;
 }
 
-function approveComment(id) {
+async function approveComment(id) {
   const data = loadData();
   const c = data.comments.find(x => x.id === id);
   if (c) {
-    ensureCsrfToken().then(() => {
-      fetch('/api/comments', {
+    try {
+      await ensureCsrfToken();
+      const res = await fetch('/api/comments', {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id, approved: true }),
-      }).catch(() => { toast('Không thể cập nhật duyệt bình luận lên server'); });
-    });
+      });
+      if (!res.ok) throw new Error('approve failed');
+    } catch {
+      toast('Không thể cập nhật duyệt bình luận lên server');
+      return;
+    }
     c.approved = true; saveData(data); renderComments(); updateBadges(); toast('Đã duyệt');
   }
 }
-function unapproveComment(id) {
+async function unapproveComment(id) {
   const data = loadData();
   const c = data.comments.find(x => x.id === id);
   if (c) {
-    ensureCsrfToken().then(() => {
-      fetch('/api/comments', {
+    try {
+      await ensureCsrfToken();
+      const res = await fetch('/api/comments', {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id, approved: false }),
-      }).catch(() => { toast('Không thể cập nhật duyệt bình luận lên server'); });
-    });
+      });
+      if (!res.ok) throw new Error('unapprove failed');
+    } catch {
+      toast('Không thể cập nhật duyệt bình luận lên server');
+      return;
+    }
     c.approved = false; saveData(data); renderComments(); updateBadges();
   }
 }
-function deleteComment(id) {
+async function deleteComment(id) {
   if (!confirm('Xoá bình luận?')) return;
-  ensureCsrfToken().then(() => {
-    fetch(`/api/comments/${id}`, {
+  try {
+    await ensureCsrfToken();
+    const res = await fetch(`/api/comments/${id}`, {
       method: 'DELETE',
       credentials: 'include',
       headers: { 'x-csrf-token': getCsrfToken() },
-    }).catch(() => { toast('Không thể xóa bình luận trên server'); });
-  });
+    });
+    if (!res.ok) throw new Error('delete comment failed');
+  } catch {
+    toast('Không thể xóa bình luận trên server');
+    return;
+  }
   const data = loadData();
   data.comments = data.comments.filter(x => x.id !== id);
   saveData(data); renderComments(); updateBadges();
@@ -1828,19 +1849,24 @@ function renderSubscribers() {
   `).join('') : `<tr><td colspan="3" class="text-center py-6" style="color: var(--fg-muted);">Chưa có ai đăng ký.</td></tr>`;
 }
 
-function removeSub(email) {
+async function removeSub(email) {
   const data = loadData();
   const map = data._subscriberMap || [];
   const found = map.find((x) => x.email === email);
   if (found?.id) {
-    ensureCsrfToken().then(() => {
-      fetch('/api/subscribers', {
+    try {
+      await ensureCsrfToken();
+      const res = await fetch('/api/subscribers', {
         method: 'DELETE',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
         body: JSON.stringify({ id: found.id }),
-      }).catch(() => { toast('Không thể xóa subscriber trên server'); });
-    });
+      });
+      if (!res.ok) throw new Error('delete subscriber failed');
+    } catch {
+      toast('Không thể xóa subscriber trên server');
+      return;
+    }
   }
   data.subscribers = (data.subscribers||[]).filter(e => e !== email);
   saveData(data); renderSubscribers();
@@ -1881,9 +1907,9 @@ function renderSettings() {
   $('#setSeoDesc').value = s.seo.defaultDesc;
 }
 
-function saveSettings() {
+async function saveSettings() {
   const data = loadData();
-  data.settings = {
+  const nextSettings = {
     siteTitle: $('#setSiteTitle').value,
     siteTagline: $('#setSiteTagline').value,
     siteDescription: $('#setSiteDesc').value,
@@ -1907,15 +1933,21 @@ function saveSettings() {
       defaultDesc: $('#setSeoDesc').value,
     },
   };
-  saveData(data);
-  ensureCsrfToken().then(() => {
-    fetch('/api/site-settings', {
+  try {
+    await ensureCsrfToken();
+    const res = await fetch('/api/site-settings', {
       method: 'PUT',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json', 'x-csrf-token': getCsrfToken() },
-      body: JSON.stringify({ settings: data.settings }),
-    }).catch(() => { toast('Không thể lưu settings lên server'); });
-  });
+      body: JSON.stringify({ settings: nextSettings }),
+    });
+    if (!res.ok) throw new Error('save settings failed');
+  } catch {
+    toast('Không thể lưu settings lên server');
+    return;
+  }
+  data.settings = nextSettings;
+  saveData(data);
   document.documentElement.style.setProperty('--accent', data.settings.accent);
   $('#adminSiteTitle').textContent = data.settings.siteTitle;
   toast('✓ Đã lưu cài đặt');

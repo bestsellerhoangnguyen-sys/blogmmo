@@ -65,5 +65,6 @@
 
 ## Next Focus
 - Continue security hardening backlog P1/P2 (`docs/HARDENING_BACKLOG.md`).
-- Expand e2e regression for account/admin workflow.
+- Expand e2e regression for account/admin workflow + v2 API integration.
 - Optional: disable `claim-admin` bootstrap once primary admin is finalized.
+- Track remaining optional items in `docs/V2_PRODUCTION_READY_CHECKLIST.md`.
