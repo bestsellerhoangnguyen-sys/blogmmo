@@ -25,6 +25,11 @@ export async function GET() {
       id: t.id,
       name: t.name,
       slug: t.slug,
+      color: t.color,
+      description: t.description,
+      seoTitle: t.seoTitle,
+      seoDescription: t.seoDescription,
+      featured: t.featured,
       count: t._count.posts,
     })),
   });
@@ -39,9 +44,14 @@ export async function POST(req: Request) {
   const name = String(body.name ?? "").trim();
   const rawSlug = String(body.slug ?? "").trim();
   const slug = rawSlug || slugify(name);
+  const color = String(body.color ?? "#c2410c").trim() || "#c2410c";
+  const description = body.description ? String(body.description) : null;
+  const seoTitle = body.seoTitle ? String(body.seoTitle) : null;
+  const seoDescription = body.seoDescription ? String(body.seoDescription) : null;
+  const featured = Boolean(body.featured);
 
   if (!name || !slug) return NextResponse.json({ error: "Missing name/slug" }, { status: 400 });
 
-  const created = await prisma.tag.create({ data: { name, slug } });
-  return NextResponse.json({ id: created.id, name: created.name, slug: created.slug }, { status: 201 });
+  const created = await prisma.tag.create({ data: { name, slug, color, description, seoTitle, seoDescription, featured } });
+  return NextResponse.json({ id: created.id, name: created.name, slug: created.slug, color: created.color, description: created.description, seoTitle: created.seoTitle, seoDescription: created.seoDescription, featured: created.featured }, { status: 201 });
 }

@@ -13,13 +13,26 @@ export async function PUT(req: Request, { params }: Params) {
   const body = await req.json();
   const name = body.name ? String(body.name).trim() : undefined;
   const slug = body.slug ? String(body.slug).trim() : undefined;
+  const color = body.color ? String(body.color).trim() : undefined;
+  const description = body.description !== undefined ? (body.description ? String(body.description) : null) : undefined;
+  const seoTitle = body.seoTitle !== undefined ? (body.seoTitle ? String(body.seoTitle) : null) : undefined;
+  const seoDescription = body.seoDescription !== undefined ? (body.seoDescription ? String(body.seoDescription) : null) : undefined;
+  const featured = body.featured !== undefined ? Boolean(body.featured) : undefined;
 
   const updated = await prisma.tag.update({
     where: { id: params.id },
-    data: { ...(name ? { name } : {}), ...(slug ? { slug } : {}) },
+    data: {
+      ...(name ? { name } : {}),
+      ...(slug ? { slug } : {}),
+      ...(color ? { color } : {}),
+      ...(description !== undefined ? { description } : {}),
+      ...(seoTitle !== undefined ? { seoTitle } : {}),
+      ...(seoDescription !== undefined ? { seoDescription } : {}),
+      ...(featured !== undefined ? { featured } : {}),
+    },
   });
 
-  return NextResponse.json({ id: updated.id, name: updated.name, slug: updated.slug });
+  return NextResponse.json({ id: updated.id, name: updated.name, slug: updated.slug, color: updated.color, description: updated.description, seoTitle: updated.seoTitle, seoDescription: updated.seoDescription, featured: updated.featured });
 }
 
 export async function DELETE(req: Request, { params }: Params) {
