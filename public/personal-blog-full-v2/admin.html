@@ -732,55 +732,55 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+      <!-- ============ TAGS VIEW ============ -->
+      <div id="tagsView" class="view-admin" style="display:none;">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="font-merri font-bold text-lg">Tags</h2>
+          <button onclick="addTag()" class="btn btn-primary">+ Thêm tag</button>
+        </div>
+        <div class="grid md:grid-cols-[1fr_360px] gap-4">
+          <div class="card" style="padding:0; overflow:hidden;">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Tên</th><th>Slug</th><th>Số bài</th><th></th></tr>
+              </thead>
+              <tbody id="tagsTableBody"></tbody>
+            </table>
+          </div>
 
-<!-- ============ TAGS VIEW ============ -->
-<div id="tagsView" class="view-admin" style="display:none;">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="font-merri font-bold text-lg">Tags</h2>
-    <button onclick="addTag()" class="btn btn-primary">+ Thêm tag</button>
-  </div>
-  <div class="grid md:grid-cols-[1fr_360px] gap-4">
-    <div class="card" style="padding:0; overflow:hidden;">
-      <table class="admin-table">
-        <thead>
-        <tr><th>Tên</th><th>Slug</th><th>Số bài</th><th></th></tr>
-        </thead>
-        <tbody id="tagsTableBody"></tbody>
-      </table>
-    </div>
+          <div class="card space-y-3">
+            <h3 class="font-merri font-bold text-base">Cài đặt tag</h3>
+            <input id="tagSettingsId" type="hidden" />
+            <div>
+              <label class="label">Tên tag</label>
+              <input id="tagSettingsName" class="input" placeholder="ui-ux" />
+            </div>
+            <div>
+              <label class="label">Slug</label>
+              <input id="tagSettingsSlug" class="input font-mono" style="font-size:.8rem;" placeholder="ui-ux" />
+            </div>
+            <div>
+              <label class="label">Màu hiển thị</label>
+              <input id="tagSettingsColor" type="color" class="input h-10" value="#c2410c" />
+            </div>
+            <div>
+              <label class="label">Mô tả ngắn</label>
+              <textarea id="tagSettingsDescription" class="textarea" rows="2" placeholder="Tag dùng cho các bài về trải nghiệm người dùng..."></textarea>
+            </div>
+            <div>
+              <label class="label">SEO title</label>
+              <input id="tagSettingsSeoTitle" class="input" placeholder="UI/UX Articles" />
+            </div>
+            <div>
+              <label class="label">SEO description</label>
+              <textarea id="tagSettingsSeoDescription" class="textarea" rows="2" placeholder="Bài viết liên quan đến thiết kế UI/UX..."></textarea>
+            </div>
+            <label class="flex items-center gap-2 text-sm"><input id="tagSettingsFeatured" type="checkbox" /> Hiển thị ưu tiên (featured)</label>
+            <button onclick="saveTagSettings()" class="btn btn-primary w-full justify-center">Lưu cài đặt tag</button>
+          </div>
+        </div>
+      </div>
 
-    <div class="card space-y-3">
-      <h3 class="font-merri font-bold text-base">Cài đặt tag</h3>
-      <input id="tagSettingsId" type="hidden" />
-      <div>
-        <label class="label">Tên tag</label>
-        <input id="tagSettingsName" class="input" placeholder="ui-ux" />
-      </div>
-      <div>
-        <label class="label">Slug</label>
-        <input id="tagSettingsSlug" class="input font-mono" style="font-size:.8rem;" placeholder="ui-ux" />
-      </div>
-      <div>
-        <label class="label">Màu hiển thị</label>
-        <input id="tagSettingsColor" type="color" class="input h-10" value="#c2410c" />
-      </div>
-      <div>
-        <label class="label">Mô tả ngắn</label>
-        <textarea id="tagSettingsDescription" class="textarea" rows="2" placeholder="Tag dùng cho các bài về trải nghiệm người dùng..."></textarea>
-      </div>
-      <div>
-        <label class="label">SEO title</label>
-        <input id="tagSettingsSeoTitle" class="input" placeholder="UI/UX Articles" />
-      </div>
-      <div>
-        <label class="label">SEO description</label>
-        <textarea id="tagSettingsSeoDescription" class="textarea" rows="2" placeholder="Bài viết liên quan đến thiết kế UI/UX..."></textarea>
-      </div>
-      <label class="flex items-center gap-2 text-sm"><input id="tagSettingsFeatured" type="checkbox" /> Hiển thị ưu tiên (featured)</label>
-      <button onclick="saveTagSettings()" class="btn btn-primary w-full justify-center">Lưu cài đặt tag</button>
     </div>
   </div>
 </div>
