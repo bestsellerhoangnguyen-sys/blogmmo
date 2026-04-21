@@ -2021,7 +2021,13 @@ function deleteCategory(id) {
 function renderTagsAdmin() {
   const data = loadData();
   const tags = data.tagsCatalog || [];
-  $('#tagsTableBody').innerHTML = tags.map(t => `
+  const table = $('#tagsTableBody');
+  if (!table) {
+    console.error('tagsTableBody not found');
+    toast('Lỗi hiển thị tab Tags, vui lòng tải lại trang');
+    return;
+  }
+  table.innerHTML = tags.map(t => `
     <tr>
       <td>
         <button class="chip" onclick="selectTagSettings('${t.id}')" style="border-color:${t.color||'#c2410c'}; color:${t.color||'#c2410c'};">${t.name}</button>
@@ -2032,7 +2038,8 @@ function renderTagsAdmin() {
     </tr>
   `).join('') || `<tr><td colspan="4" class="text-center py-8" style="color: var(--fg-muted);">Chưa có tag.</td></tr>`;
 
-  if (tags.length > 0 && !$('#tagSettingsId').value) {
+  const tagIdInput = $('#tagSettingsId');
+  if (tags.length > 0 && tagIdInput && !tagIdInput.value) {
     selectTagSettings(tags[0].id);
   }
 }
@@ -2059,6 +2066,7 @@ function selectTagSettings(id) {
   const data = loadData();
   const t = (data.tagsCatalog || []).find(x => x.id === id);
   if (!t) return;
+  if (!$('#tagSettingsId')) return;
   $('#tagSettingsId').value = t.id;
   $('#tagSettingsName').value = t.name || '';
   $('#tagSettingsSlug').value = t.slug || '';
@@ -2070,7 +2078,9 @@ function selectTagSettings(id) {
 }
 
 function saveTagSettings() {
-  const id = $('#tagSettingsId').value;
+  const idEl = $('#tagSettingsId');
+  if (!idEl) return toast('Tag settings chưa sẵn sàng');
+  const id = idEl.value;
   if (!id) return toast('Chọn 1 tag trước');
   const patch = {
     name: $('#tagSettingsName').value.trim(),
