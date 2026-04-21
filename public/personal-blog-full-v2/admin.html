@@ -218,13 +218,46 @@
   .trend-down { color: var(--danger); }
 
   /* Panel section */
-  .settings-section {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
-  }
+.settings-section {
+ background: var(--card); border: 1px solid var(--border);
+ border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem;
+}
+
+ .sync-status {
+ position: fixed;
+ right: 16px;
+ top: 72px;
+ z-index: 65;
+ border: 1px solid var(--border);
+ border-radius: 10px;
+ padding: .45rem .7rem;
+ font-size: .75rem;
+ background: var(--card);
+ display: inline-flex;
+ align-items: center;
+ gap: .5rem;
+ box-shadow: 0 8px 18px rgba(0,0,0,.12);
+ }
+
+ .sync-dot {
+ width: 8px;
+ height: 8px;
+ border-radius: 999px;
+ display: inline-block;
+ }
+
+ .sync-ok { background: #16a34a; }
+ .sync-pending { background: #d97706; }
+ .sync-error { background: #dc2626; }
 </style>
 </head>
 <body>
+
+<div id="syncStatus" class="sync-status" style="display:none;">
+ <span id="syncDot" class="sync-dot sync-ok"></span>
+ <span id="syncLabel">Online</span>
+ <button id="syncRetryBtn" class="btn btn-ghost" style="padding:.2rem .45rem; font-size:.7rem; display:none;">Thử lại</button>
+</div>
 
 <!-- =============== LOGIN VIEW =============== -->
 <div id="loginView" style="display:none;">
@@ -734,7 +767,7 @@ let isLoggedIn = false;
 
 async function checkAdminSession(showToastMsg = false) {
   try {
-    const res = await fetch('/api/admin/users', { credentials: 'include' });
+    const res = await withSyncState(() => fetch('/api/admin/users', { credentials: 'include' }));
     isLoggedIn = res.ok;
     if (isLoggedIn) {
       await syncPostsFromApi();
@@ -768,12 +801,15 @@ function doLogout() {
 function showApp() {
   $('#loginView').style.display = 'none';
   $('#adminApp').style.display = 'flex';
+  setSyncState('ok', 'Online');
   route();
 }
 
 function showLogin() {
   $('#loginView').style.display = 'block';
   $('#adminApp').style.display = 'none';
+  const box = $('#syncStatus');
+  if (box) box.style.display = 'none';
 }
 
 async function ensureCsrfToken() {
@@ -936,7 +972,7 @@ async function saveCurrentPostToApi(post) {
   const url = isNew ? '/api/posts' : `/api/posts/${post.id}`;
   const method = isNew ? 'POST' : 'PATCH';
 
-  const res = await fetch(url, {
+  const res = await withSyncState(() => fetch(url, {
     method,
     credentials: 'include',
     headers: {
@@ -944,7 +980,7 @@ async function saveCurrentPostToApi(post) {
       'x-csrf-token': csrf,
     },
     body: JSON.stringify(payload),
-  });
+  }));
 
   if (!res.ok) {
     const t = await res.text().catch(() => '');
@@ -957,11 +993,11 @@ async function deletePostOnApi(id) {
   if (!id || String(id).startsWith('p')) return;
   await ensureCsrfToken();
   const csrf = getCsrfToken();
-  await fetch(`/api/posts/${id}`, {
+  await withSyncState(() => fetch(`/api/posts/${id}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: { 'x-csrf-token': csrf },
-  });
+  }));
 }
 
 /* =================== STATE =================== */
@@ -970,11 +1006,35 @@ let state = {
   editingPostId: null,
   theme: localStorage.getItem('theme') || 'light',
   confirmCb: null,
-  pickerCb: null,
+ pickerCb: null,
+ syncState: 'ok',
 };
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
+
+function setSyncState(next, label) {
+ state.syncState = next;
+ const box = $('#syncStatus');
+ if (!box) return;
+ box.style.display = isLoggedIn ? 'inline-flex' : 'none';
+ $('#syncDot').className = `sync-dot ${next === 'ok' ? 'sync-ok' : next === 'pending' ? 'sync-pending' : 'sync-error'}`;
+ $('#syncLabel').textContent = label || (next === 'ok' ? 'Online' : next === 'pending' ? 'Đang đồng bộ...' : 'Lỗi đồng bộ');
+ const retry = $('#syncRetryBtn');
+ retry.style.display = next === 'error' ? 'inline-flex' : 'none';
+}
+
+async function withSyncState(fn) {
+ try {
+   setSyncState('pending');
+   const result = await fn();
+   setSyncState('ok', 'Online');
+   return result;
+ } catch (e) {
+   setSyncState('error', 'Lỗi đồng bộ');
+   throw e;
+ }
+}
 
 function toast(msg) { const t=$('#toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1800); }
 
@@ -1987,6 +2047,9 @@ function confirmYes() { if (state.confirmCb) state.confirmCb(); closeConfirm(); 
 /* =================== INIT =================== */
 $('#adminSiteTitle').textContent = getSettings().siteTitle;
 document.documentElement.style.setProperty('--accent', getSettings().accent);
+$('#syncRetryBtn')?.addEventListener('click', () => {
+  checkAdminSession(true);
+});
 checkAdminSession();
 </script>
 </body>
